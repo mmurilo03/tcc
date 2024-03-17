@@ -1,11 +1,12 @@
 import { GameObject } from "./GameObject/GameObject.ts";
 import { Dimensions } from "./Interfaces/Dimensions.ts";
+import { Context } from "./Interfaces/Context.ts";
 
 export class Game {
     width: number;
     height: number;
     canvas: HTMLCanvasElement;
-    context: CanvasRenderingContext2D;
+    context: Context;
     player: GameObject;
 
     constructor({ width, height }: Dimensions) {
@@ -13,19 +14,19 @@ export class Game {
         this.height = height;
 
         this.canvas = document.createElement("canvas");
-        this.canvas.className = "canvas1";
-        this.canvas.width = 500;
-        this.canvas.height = 500;
+        this.canvas.width = width;
+        this.canvas.height = height;
         this.context = this.canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
         this.player = new GameObject(
             {
-                game: this,
+                context: this.context,
                 imageName: "/player2Hitboxes.png",
                 x: 250,
                 y: 250,
-            },
-            { height: 100, width: 100 }
+                height: 100,
+                width: 100
+            }
         );
     }
     update() {
@@ -42,8 +43,6 @@ export class Game {
 }
 
 export const game = new Game({ width: 500, height: 500 });
-// console.log(game);
-// container.appendChild(game.canvas);
 
 const animate = () => {
     game.context.clearRect(0, 0, game.width, game.height);

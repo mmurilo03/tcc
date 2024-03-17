@@ -1,11 +1,11 @@
-import { Dimensions } from "../Interfaces/Dimensions";
 import { Coordinates, GameObjectInterface, GameObjectProperties } from "../Interfaces/GameObjectInterfaces";
-import { Game } from "../main";
+import { Context } from "../Interfaces/Context.ts";
 
 export class GameObject implements GameObjectInterface, GameObjectProperties {
-    game: Game;
+    context: Context;
     imageName: string;
     imageElement: HTMLImageElement;
+    image?: HTMLImageElement;
     x: number;
     y: number;
     loading: boolean = true;
@@ -20,14 +20,17 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     hitboxes: Coordinates[][][];
     animationFrame: Coordinates[];
 
-    context: CanvasRenderingContext2D;
-    dimensions: Dimensions;
+    width: number;
+    height: number;
 
-    constructor(gameObjectInterface: GameObjectInterface, dimensions: Dimensions) {
-        this.game = gameObjectInterface.game;
+    constructor(gameObjectInterface: GameObjectInterface, image?: HTMLImageElement) {
+        this.context = gameObjectInterface.context;
         this.imageName = gameObjectInterface.imageName;
         this.x = gameObjectInterface.x;
         this.y = gameObjectInterface.y;
+        this.width = gameObjectInterface.width;
+        this.height = gameObjectInterface.height;
+
         this.loading = true;
 
         this.hitboxCount = 0;
@@ -37,20 +40,24 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         this.hitboxes = []; // points of the hitbox
         this.animationFrame = []; // animation frame count per line on image
 
-        this.context = this.game.context;
-        this.dimensions = dimensions;
+        this.image = image;
 
         const img = new Image();
-        img.src = this.imageName;
-        img.onload = () => {
-            this.imageElement = img;
+        this.imageElement = this.image ? this.image : img;
+
+        if (!image) {
+            img.src = this.imageName;
+            img.onload = () => {
+                this.imageElement = img;
+                this.countHitboxes();
+                this.loadHitBox();
+                this.loading = false;
+            };
+        } else {
             this.countHitboxes();
             this.loadHitBox();
             this.loading = false;
-        };
-        this.imageElement = img;
-
-        // this.image = document.getElementById("player");
+        }
     }
 
     eraseImage(outline: Coordinates[]) {
@@ -58,7 +65,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         // console.log(outline);
         outline.forEach((element) => {
             let endPixel = [element.x, 0];
-            for (let i = element.y + 1; i < this.dimensions.height; i++) {
+            for (let i = element.y + 1; i < this.height; i++) {
                 if (this.search({ x: endPixel[0], y: i }, outline)) {
                     this.context.clearRect(endPixel[0], element.y, 1, i);
                 }
@@ -70,8 +77,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         console.log("Counting hitboxes and separating animation frames");
         // Image size divided by object size
         let numberOfPossibleHitboxes =
-            (this.imageElement.naturalHeight * this.imageElement.naturalWidth) /
-            (this.dimensions.height * this.dimensions.width);
+            (this.imageElement.naturalHeight * this.imageElement.naturalWidth) / (this.height * this.width);
         let loopCounter = 0;
         let positionX = 0; // X position of the cropped image
         let positionY = 0; // Y position of the cropped image
@@ -80,14 +86,14 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
                 this.imageElement,
                 positionX,
                 positionY,
-                this.dimensions.width,
-                this.dimensions.height,
+                this.width,
+                this.height,
                 0,
                 0,
-                this.dimensions.width,
-                this.dimensions.height
+                this.width,
+                this.height
             );
-            const imgData = this.context.getImageData(0, 0, this.dimensions.width, this.dimensions.height);
+            const imgData = this.context.getImageData(0, 0, this.width, this.height);
             const pixels = imgData.data;
             for (let i = 0; i <= pixels.length; i += 4) {
                 // const r = pixels[i];
@@ -102,11 +108,11 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
                 }
             }
 
-            this.context.clearRect(0, 0, this.dimensions.width, this.dimensions.height);
-            positionX += this.dimensions.width; // Moves the cropped image to the left based on width
+            this.context.clearRect(0, 0, this.width, this.height);
+            positionX += this.width; // Moves the cropped image to the left based on width
             if (positionX >= this.imageElement.naturalWidth) {
                 // Resets position if it's out of the image and moves down
-                positionY += this.dimensions.height;
+                positionY += this.height;
                 positionX = 0;
             }
             loopCounter++;
@@ -116,7 +122,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
             }
         }
         console.log("HITBOX COUNT: ", this.hitboxCount);
-        // this.hitboxCount = 2;
+        this.hitboxCount = 2;
     }
 
     loadHitBox() {
@@ -124,21 +130,21 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         let c = 0;
         while (c < this.hitboxCount) {
             // console.log("Loading: ", c);
-            this.context.clearRect(0, 0, this.dimensions.width, this.dimensions.height);
+            this.context.clearRect(0, 0, this.width, this.height);
             this.context.drawImage(
                 this.imageElement,
                 this.animationFrame[c].x,
                 this.animationFrame[c].y,
-                this.dimensions.width,
-                this.dimensions.height,
+                this.width,
+                this.height,
                 0,
                 0,
-                this.dimensions.width,
-                this.dimensions.height
+                this.width,
+                this.height
             );
 
             // Image details
-            let imgData = this.context.getImageData(0, 0, this.dimensions.width, this.dimensions.height);
+            let imgData = this.context.getImageData(0, 0, this.width, this.height);
             let pixels = imgData.data;
             let tempHitbox: Coordinates[] = [];
             // console.log(pixels.length);
@@ -155,7 +161,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
                         const o = pixels[i + 3];
                         if (o > 0) {
                             tempHitbox.push({
-                                x: (i / 4) % this.dimensions.width,
+                                x: (i / 4) % this.width,
                                 y: Math.floor(i / 4 / 100),
                             });
                         }
@@ -163,7 +169,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
                     // console.log(tempHitbox);
                     tempHitbox = this.drawOutline(tempHitbox);
                     this.eraseImage(tempHitbox);
-                    imgData = this.context.getImageData(0, 0, this.dimensions.width, this.dimensions.height);
+                    imgData = this.context.getImageData(0, 0, this.width, this.height);
                     pixels = imgData.data;
                     if (tempHitbox.length > 0) {
                         this.hitboxes[c] = this.hitboxes[c] == undefined ? [] : this.hitboxes[c];
@@ -171,8 +177,8 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
 
                         tempHitbox = [];
                         // this.context.putImageData(imgData, 0, 0);
-                        // this.context.strokeRect(1, 1, this.dimensions.width - 2, this.dimensions.height - 2);
-                        // this.context.clearRect(0, 0, this.dimensions.width, this.dimensions.height);
+                        // this.context.strokeRect(1, 1, this.width - 2, this.height - 2);
+                        // this.context.clearRect(0, 0, this.width, this.height);
                     }
                     // break; [[0], [1], [2]]
                 }
@@ -295,18 +301,18 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         }
         this.context.fillStyle = "red";
         this.context.strokeStyle = "red";
-        // this.context.fillRect(this.x, this.y, this.dimensions.width, this.dimensions.height);
+        // this.context.fillRect(this.x, this.y, this.width, this.height);
 
         this.context.drawImage(
             this.imageElement,
             this.animationFrame[this.activeFrame].x,
             this.animationFrame[this.activeFrame].y,
-            this.dimensions.width,
-            this.dimensions.height,
+            this.width,
+            this.height,
             this.x,
             this.y,
-            this.dimensions.width,
-            this.dimensions.height
+            this.width,
+            this.height
         );
         this.context.beginPath();
         // For each animation frame, get every outline and draw it
@@ -326,17 +332,17 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
 
     drawSimple() {
         // this.frameCounter++;
-        // this.context.fillRect(this.x, this.y, this.dimensions.width, this.dimensions.height);
+        // this.context.fillRect(this.x, this.y, this.width, this.height);
         this.context.drawImage(
             this.imageElement,
             this.animationFrame[this.activeFrame].x,
             this.animationFrame[this.activeFrame].y,
-            this.dimensions.width,
-            this.dimensions.height,
+            this.width,
+            this.height,
             this.x,
             this.y,
-            this.dimensions.width,
-            this.dimensions.height
+            this.width,
+            this.height
         );
     }
 }
