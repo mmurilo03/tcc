@@ -1,4 +1,4 @@
-import { Game } from "../main";
+import { Context } from "./Context";
 
 export interface Coordinates {
     x: number;
@@ -6,10 +6,12 @@ export interface Coordinates {
 }
 
 export interface GameObjectInterface {
-    game: Game;
+    context: Context;
     imageName: string;
     x: number;
     y: number;
+    width: number;
+    height: number;
 }
 
 export interface GameObjectProperties {
