@@ -5,7 +5,6 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     context: Context;
     imageName: string;
     imageElement: HTMLImageElement;
-    image?: HTMLImageElement;
     x: number;
     y: number;
     loading: boolean = true;
@@ -23,7 +22,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     width: number;
     height: number;
 
-    constructor(gameObjectInterface: GameObjectInterface, image?: HTMLImageElement) {
+    constructor(gameObjectInterface: GameObjectInterface, imageElement?: HTMLImageElement) {
         this.context = gameObjectInterface.context;
         this.imageName = gameObjectInterface.imageName;
         this.x = gameObjectInterface.x;
@@ -40,12 +39,10 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         this.hitboxes = []; // points of the hitbox
         this.animationFrame = []; // animation frame count per line on image
 
-        this.image = image;
-
         const img = new Image();
-        this.imageElement = this.image ? this.image : img;
+        this.imageElement = imageElement ? imageElement : img;
 
-        if (!image) {
+        if (!imageElement) {
             img.src = this.imageName;
             img.onload = () => {
                 this.imageElement = img;
