@@ -1,24 +1,21 @@
+import { CanvasRenderingContext2D, Image } from "canvas";
+
 export interface Coordinates {
     x: number;
     y: number;
 }
 
-export interface GameObjectInterface {
+export interface HitboxMakerInterface {
     context: CanvasRenderingContext2D;
     imageName: string;
-    x: number;
-    y: number;
-    width: number;
+    width: number;    
     height: number;
 }
 
-export interface GameObjectProperties {
-    imageElement: HTMLImageElement;
-    loading: boolean;
+export interface HitboxMakerProperties {
+    imageElement: Image;
     hitboxCount: number;
     activeFrame: number;
-    frameCounter: number;
-    flip: boolean;
     hitboxes: Array<Array<Array<Coordinates>>>;
     animationFrame?: Array<Coordinates>;
 }

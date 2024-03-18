@@ -1,13 +1,14 @@
 import { GameObject } from "./GameObject/GameObject.ts";
 import { Dimensions } from "./Interfaces/Dimensions.ts";
-import { Context } from "./Interfaces/Context.ts";
+import { Wolf } from "./GameClasses/Wolf.ts";
 
 export class Game {
     width: number;
     height: number;
     canvas: HTMLCanvasElement;
-    context: Context;
+    context: CanvasRenderingContext2D;
     player: GameObject;
+    loading: boolean = true;
 
     constructor({ width, height }: Dimensions) {
         this.width = width;
@@ -18,17 +19,13 @@ export class Game {
         this.canvas.height = height;
         this.context = this.canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
-        this.player = new GameObject(
-            {
-                context: this.context,
-                imageName: "/player2Hitboxes.png",
-                x: 250,
-                y: 250,
-                height: 100,
-                width: 100
-            }
-        );
+        this.player = new Wolf({
+            context: this.context,
+            x: 250,
+            y: 250,
+        });
     }
+
     update() {
         if (!this.player.loading) {
             this.player.update(0);
