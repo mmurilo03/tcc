@@ -1,6 +1,11 @@
-import { Coordinates, HitboxMakerInterface, HitboxMakerProperties } from "../Interfaces/HitboxMakerInterfaces";
+import {
+    Coordinates,
+    HitboxMakerInterface,
+    HitboxMakerProperties,
+} from "../Interfaces/HitboxMakerInterfaces";
 import { CanvasRenderingContext2D, Image } from "canvas";
 import { writeJsonFile } from "write-json-file";
+import paper from "paper";
 
 export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties {
     context: CanvasRenderingContext2D;
@@ -12,7 +17,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
     // Array with frames
     // Array with each outline of a frame
     // Array of points
-    hitboxes: Coordinates[][][];
+    hitboxes: string[][][];
     animationFrame: Coordinates[];
 
     width: number;
@@ -30,8 +35,8 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         this.animationFrame = []; // animation frame count per line on image
 
         this.imageElement = image;
-        this.countHitboxes()
-        this.loadHitBox()
+        this.countHitboxes();
+        this.loadHitBox();
     }
 
     eraseImage(outline: Coordinates[]) {
@@ -141,7 +146,14 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
                     pixels = imgData.data;
                     if (tempHitbox.length > 0) {
                         this.hitboxes[c] = this.hitboxes[c] == undefined ? [] : this.hitboxes[c];
-                        this.hitboxes[c].push([...tempHitbox]);
+
+                        paper.setup(new paper.Size(1, 1));
+                        const path = new paper.Path(tempHitbox);
+                        path.simplify(10);
+                        const simplePath = (path.exportSVG() as SVGElement)
+                            .getAttribute("d")
+                            ?.toLocaleLowerCase() as string;
+                        this.hitboxes[c].push([simplePath]);
 
                         tempHitbox = [];
                     }
@@ -149,9 +161,14 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             }
             c++;
         }
+        // Draws current hitbox (comment)
         // this.draw(this.context);
-        const hitbox = {}
-        hitbox[`${this.imageName}`] = { hitboxCount: this.hitboxCount ,hitboxes: this.hitboxes, animationFrame: this.animationFrame};
+        const hitbox = {};
+        hitbox[`${this.imageName}`] = {
+            hitboxCount: this.hitboxCount,
+            hitboxes: this.hitboxes,
+            animationFrame: this.animationFrame,
+        };
         writeJsonFile("./gameEngine/exports.json", { exports: hitbox });
     }
 
@@ -162,78 +179,85 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         let count = 0;
         for (let i = 0; i < arr.length; i++) {
             const lastPoint: Coordinates = newArr[newArr.length - 1];
-            if (direction == "right") {
-                if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                    // look up
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                    direction = "up";
-                } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                    // look right
-                    newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                    direction = "right";
-                } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                    // look down
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                    direction = "down";
-                } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                    // look left
-                    newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                    direction = "left";
-                }
-            } else if (direction == "down") {
-                if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                    // look right
-                    newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                    direction = "right";
-                } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                    // look down
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                    direction = "down";
-                } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                    // look left
-                    newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                    direction = "left";
-                } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                    // look up
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                    direction = "up";
-                }
-            } else if (direction == "up") {
-                if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                    // look left
-                    newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                    direction = "left";
-                } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                    // look up
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                    direction = "up";
-                } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                    // look right
-                    newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                    direction = "right";
-                } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                    // look down
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                    direction = "down";
-                }
-            } else if (direction == "left") {
-                if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                    // look down
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                    direction = "down";
-                } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                    // look left
-                    newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                    direction = "left";
-                } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                    // look up
-                    newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                    direction = "up";
-                } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                    // look right
-                    newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                    direction = "right";
-                }
+            switch (direction) {
+                case "right":
+                    if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
+                        // look up
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
+                        direction = "up";
+                    } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
+                        // look right
+                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
+                        direction = "right";
+                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
+                        // look down
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
+                        direction = "down";
+                    } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
+                        // look left
+                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
+                        direction = "left";
+                    }
+                    break;
+                case "down":
+                    if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
+                        // look right
+                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
+                        direction = "right";
+                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
+                        // look down
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
+                        direction = "down";
+                    } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
+                        // look left
+                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
+                        direction = "left";
+                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
+                        // look up
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
+                        direction = "up";
+                    }
+                    break;
+                case "up":
+                    if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
+                        // look left
+                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
+                        direction = "left";
+                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
+                        // look up
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
+                        direction = "up";
+                    } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
+                        // look right
+                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
+                        direction = "right";
+                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
+                        // look down
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
+                        direction = "down";
+                    }
+                    break;
+                case "left":
+                    if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
+                        // look down
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
+                        direction = "down";
+                    } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
+                        // look left
+                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
+                        direction = "left";
+                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
+                        // look up
+                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
+                        direction = "up";
+                    } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
+                        // look right
+                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
+                        direction = "right";
+                    }
+                    break;
+                default:
+                    break;
             }
             count++;
         }

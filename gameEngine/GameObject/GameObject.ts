@@ -16,7 +16,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     // Array with frames
     // Array with each outline of a frame
     // Array of points
-    hitboxes: Coordinates[][][];
+    hitboxes: string[][][];
     animationFrame: Coordinates[];
 
     width: number;
@@ -33,7 +33,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         this.loading = true;
 
         this.hitboxCount = 0;
-        this.activeFrame = 0;
+        this.activeFrame = Math.round(Math.random() * 70);
         this.frameCounter = 0;
         this.flip = false;
         this.hitboxes = []; // points of the hitbox
@@ -50,10 +50,13 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     }
 
     loadFromExport() {
-        this.hitboxCount = exports[this.imageName as keyof typeof exports].hitboxCount;
-        this.hitboxes = exports[this.imageName as keyof typeof exports].hitboxes;
-        this.animationFrame = exports[this.imageName as keyof typeof exports].animationFrame;
-        this.loading = false;
+        this.hitboxCount = exports[this.imageName as keyof typeof exports]?.hitboxCount;
+        this.hitboxes = exports[this.imageName as keyof typeof exports]?.hitboxes;
+        this.animationFrame = exports[this.imageName as keyof typeof exports]?.animationFrame;
+
+        if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationFrame.length > 0) {
+            this.loading = false;
+        }
     }
 
     update(n: number) {
@@ -88,19 +91,18 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
             this.width,
             this.height
         );
-        this.context.beginPath();
         // For each animation frame, get every outline and draw it
         for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
             let currentOutline = this.hitboxes[this.activeFrame][outline];
-            // Move to the first point
-            this.context.moveTo(currentOutline[0].x + this.x, currentOutline[0].y + this.y);
             // Draw the outline
             for (let i = 0; i < currentOutline.length; i++) {
-                this.context.lineTo(currentOutline[i].x + this.x, currentOutline[i].y + this.y);
+                const path = new Path2D(`M${this.x} ${this.y},${currentOutline[i]}`);
+
+                // Makes the outline visible
+                // this.context.stroke(path);
             }
         }
         // this.context.fill();
-        this.context.stroke();
         this.context.restore();
     }
 

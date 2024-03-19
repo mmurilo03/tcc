@@ -19,6 +19,6 @@ export interface GameObjectProperties {
     activeFrame: number;
     frameCounter: number;
     flip: boolean;
-    hitboxes: Array<Array<Array<Coordinates>>>;
+    hitboxes: Array<Array<Array<string>>>;
     animationFrame?: Array<Coordinates>;
 }
