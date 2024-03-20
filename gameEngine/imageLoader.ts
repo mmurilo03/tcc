@@ -29,24 +29,41 @@ global.Image = fakeDOM.window.Image;
 const canvas = createCanvas(500, 500);
 const context = canvas.getContext("2d");
 
-const files = fs.readdirSync("./gameEngine/GameClasses");
+const fsPathToGameFiles = "./gameEngine/GameClasses";
+const files = fs.readdirSync(fsPathToGameFiles);
+const filePaths: string[] = [];
 
-files.forEach(async (file) => {
-    const importedClass = await import(`./GameClasses/${file}`);
+const getFilesAndFolders = (path: string, files: string[]) => {
+    files.forEach((file) => {
+        if (fs.statSync(`${path}/${file}`).isDirectory()) {
+            const newFiles = fs.readdirSync(`${path}/${file}`);
+            getFilesAndFolders(`${path}/${file}`, newFiles);
+        } else if (file.endsWith(".ts")) {
+            filePaths.push(`${path}/${file}`);
+        }
+    });
+};
 
-    const gameClass = importedClass[file.split(".")[0]];
-
-    const image = await loadImage(`public/${gameClass.imageName}`);
-
-    // const c = new gameClass({ context, x: 0, y: 0 });
-
-    console.log(importedClass);
-
-    const b = new HitboxMaker({
-        context: context,
-        width: gameClass.width,
-        height: gameClass.height,
-        imageName: gameClass.imageName,
-    }, image);
+getFilesAndFolders(fsPathToGameFiles, files);
+filePaths.forEach(async (file) => {
+    const importedClass = await import(file.replace("/gameEngine", ""));
+    const keys = Object.keys(importedClass);
+    keys.forEach(async (key) => {
+        const currentClass = importedClass[key];
+        const width = currentClass.width;
+        const height = currentClass.height;
+        const imageName = currentClass.imageName;
+        if (width && height && imageName && fs.existsSync(`./public/${imageName}`)) {
+            const image = await loadImage(`public/${imageName}`);
+            const hitboxMaker = new HitboxMaker(
+                {
+                    context: context,
+                    width: width,
+                    height: height,
+                    imageName: imageName,
+                },
+                image
+            );
+        }
+    });
 });
-
