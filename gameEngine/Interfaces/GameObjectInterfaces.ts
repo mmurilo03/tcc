@@ -5,7 +5,7 @@ export interface Coordinates {
 
 export interface GameObjectInterface {
     context: CanvasRenderingContext2D;
-    imageName: string;
+    imagePath: string;
     x: number;
     y: number;
     width: number;

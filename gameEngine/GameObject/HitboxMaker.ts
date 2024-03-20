@@ -10,7 +10,7 @@ import { exports } from "../exports.json";
 
 export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties {
     context: CanvasRenderingContext2D;
-    imageName: string;
+    imagePath: string;
     imageElement: Image;
     hitboxCount: number;
     activeFrame: number;
@@ -28,7 +28,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         this.context = hitboxMakerInterface.context;
         this.width = hitboxMakerInterface.width;
         this.height = hitboxMakerInterface.height;
-        this.imageName = hitboxMakerInterface.imageName;
+        this.imagePath = hitboxMakerInterface.imagePath;
 
         this.hitboxCount = 0;
         this.activeFrame = 0;
@@ -53,6 +53,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
 
     countHitboxes() {
         console.log("Counting hitboxes and separating animation frames");
+        console.log(`Image: ${this.imagePath}`);
         // Image size divided by object size
         let numberOfPossibleHitboxes =
             (this.imageElement.naturalHeight * this.imageElement.naturalWidth) / (this.height * this.width);
@@ -164,7 +165,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         }
         // Draws current hitbox (comment)
         // this.draw(this.context);
-        exports[`${this.imageName}`] = {
+        exports[`${this.imagePath}`] = {
             hitboxCount: this.hitboxCount,
             hitboxes: this.hitboxes,
             animationFrame: this.animationFrame,

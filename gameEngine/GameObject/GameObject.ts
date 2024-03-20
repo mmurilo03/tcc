@@ -3,7 +3,7 @@ import { exports } from "../exports.json";
 
 export class GameObject implements GameObjectInterface, GameObjectProperties {
     context: CanvasRenderingContext2D;
-    imageName: string;
+    imagePath: string;
     imageElement: HTMLImageElement;
     x: number;
     y: number;
@@ -24,7 +24,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
 
     constructor(gameObjectInterface: GameObjectInterface) {
         this.context = gameObjectInterface.context;
-        this.imageName = gameObjectInterface.imageName;
+        this.imagePath = gameObjectInterface.imagePath;
         this.x = gameObjectInterface.x;
         this.y = gameObjectInterface.y;
         this.width = gameObjectInterface.width;
@@ -42,7 +42,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         const img = new Image();
         this.imageElement = img;
 
-        img.src = this.imageName;
+        img.src = `./gameEngine/GameImages/${this.imagePath}`;
         img.onload = () => {
             this.imageElement = img;
             this.loadFromExport();
@@ -50,9 +50,11 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     }
 
     loadFromExport() {
-        this.hitboxCount = exports[this.imageName as keyof typeof exports]?.hitboxCount;
-        this.hitboxes = exports[this.imageName as keyof typeof exports]?.hitboxes;
-        this.animationFrame = exports[this.imageName as keyof typeof exports]?.animationFrame;
+        console.log(this.imagePath);
+        
+        this.hitboxCount = exports[this.imagePath as keyof typeof exports]?.hitboxCount;
+        this.hitboxes = exports[this.imagePath as keyof typeof exports]?.hitboxes;
+        this.animationFrame = exports[this.imagePath as keyof typeof exports]?.animationFrame;
 
         if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationFrame.length > 0) {
             this.loading = false;

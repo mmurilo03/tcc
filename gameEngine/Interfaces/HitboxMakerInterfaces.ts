@@ -7,7 +7,7 @@ export interface Coordinates {
 
 export interface HitboxMakerInterface {
     context: CanvasRenderingContext2D;
-    imageName: string;
+    imagePath: string;
     width: number;    
     height: number;
 }
