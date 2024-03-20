@@ -9,6 +9,7 @@ export class Game {
     context: CanvasRenderingContext2D;
     player: GameObject;
     loading: boolean = true;
+    inputs: string[] = [];
 
     constructor({ width, height }: Dimensions) {
         this.width = width;
@@ -24,6 +25,19 @@ export class Game {
             x: 250,
             y: 250,
         });
+    }
+
+    addInput(key: string) {
+        if (this.inputs.includes(key)) return;
+        this.inputs.push(key);
+        console.log(this.inputs);
+        
+    }
+
+    removeInput(key: string) {
+        if (!this.inputs.includes(key)) return;
+        this.inputs.splice(this.inputs.indexOf(key), 1)
+        console.log(this.inputs);
     }
 
     update() {

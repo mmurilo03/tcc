@@ -49,9 +49,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         };
     }
 
-    loadFromExport() {
-        console.log(this.imagePath);
-        
+    loadFromExport() {        
         this.hitboxCount = exports[this.imagePath as keyof typeof exports]?.hitboxCount;
         this.hitboxes = exports[this.imagePath as keyof typeof exports]?.hitboxes;
         this.animationFrame = exports[this.imagePath as keyof typeof exports]?.animationFrame;
@@ -63,14 +61,12 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
 
     update(n: number) {
         this.x += n;
-        this.frameCounter++;
+        // this.frameCounter++;
     }
 
     draw() {
-        this.context.save();
         if (this.flip) {
-            this.context.scale(-1, 1);
-            this.context.translate(-500, 0);
+            this.context.setTransform(-1, 0, 0, 1, 500+this.x/2, 0);
         }
         if (this.frameCounter > 4) {
             this.frameCounter = 0;
@@ -105,7 +101,9 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
             }
         }
         // this.context.fill();
-        this.context.restore();
+        if (this.flip) {
+            this.context.setTransform(1, 0, 0, 1, 0, 0);
+        }
     }
 
     drawSimple() {
