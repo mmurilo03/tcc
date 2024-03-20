@@ -6,6 +6,7 @@ import {
 import { CanvasRenderingContext2D, Image } from "canvas";
 import { writeJsonFile } from "write-json-file";
 import paper from "paper";
+import { exports } from "../exports.json";
 
 export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties {
     context: CanvasRenderingContext2D;
@@ -105,6 +106,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         console.log("Making hitbox outlines");
         let c = 0;
         while (c < this.hitboxCount) {
+            console.log(`Hitbox ${c + 1}/${this.hitboxCount}`);
             this.context.clearRect(0, 0, this.width, this.height);
             this.context.drawImage(
                 this.imageElement,
@@ -126,7 +128,6 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
                 // Searching for pixels with opacity
                 const pixelOpacity = pixels[pixel + 3];
                 if (pixelOpacity > 0) {
-                    console.log("Found");
                     for (let i = pixel; i <= pixels.length; i += 4) {
                         // If it finds a pixel, creates hitbox
                         // const r = pixels[i];
@@ -163,13 +164,12 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         }
         // Draws current hitbox (comment)
         // this.draw(this.context);
-        const hitbox = {};
-        hitbox[`${this.imageName}`] = {
+        exports[`${this.imageName}`] = {
             hitboxCount: this.hitboxCount,
             hitboxes: this.hitboxes,
             animationFrame: this.animationFrame,
         };
-        writeJsonFile("./gameEngine/exports.json", { exports: hitbox });
+        writeJsonFile("./gameEngine/exports.json", { exports: exports });
     }
 
     drawOutline(arr: Coordinates[]) {

@@ -33,7 +33,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         this.loading = true;
 
         this.hitboxCount = 0;
-        this.activeFrame = Math.round(Math.random() * 70);
+        this.activeFrame = 0;
         this.frameCounter = 0;
         this.flip = false;
         this.hitboxes = []; // points of the hitbox
@@ -70,7 +70,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
             this.context.scale(-1, 1);
             this.context.translate(-500, 0);
         }
-        if (this.frameCounter > 10) {
+        if (this.frameCounter > 4) {
             this.frameCounter = 0;
             this.activeFrame++;
             if (this.activeFrame >= this.hitboxCount) {
