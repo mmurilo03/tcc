@@ -1,7 +1,9 @@
 import { Coordinates, GameObjectInterface, GameObjectProperties } from "../Interfaces/GameObjectInterfaces";
 import { exports } from "../exports.json";
+import { Game } from "../main";
 
 export class GameObject implements GameObjectInterface, GameObjectProperties {
+    game?: Game;
     context: CanvasRenderingContext2D;
     imagePath: string;
     imageElement: HTMLImageElement;
@@ -23,6 +25,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     height: number;
 
     constructor(gameObjectInterface: GameObjectInterface) {
+        this.game = gameObjectInterface.game;
         this.context = gameObjectInterface.context;
         this.imagePath = gameObjectInterface.imagePath;
         this.x = gameObjectInterface.x;
@@ -49,7 +52,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         };
     }
 
-    loadFromExport() {        
+    loadFromExport() {
         this.hitboxCount = exports[this.imagePath as keyof typeof exports]?.hitboxCount;
         this.hitboxes = exports[this.imagePath as keyof typeof exports]?.hitboxes;
         this.animationFrame = exports[this.imagePath as keyof typeof exports]?.animationFrame;
@@ -66,7 +69,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
 
     draw() {
         if (this.flip) {
-            this.context.setTransform(-1, 0, 0, 1, 500+this.x/2, 0);
+            this.context.setTransform(-1, 0, 0, 1, 500 + this.x / 2, 0);
         }
         if (this.frameCounter > 4) {
             this.frameCounter = 0;

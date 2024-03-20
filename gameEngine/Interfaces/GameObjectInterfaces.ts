@@ -1,9 +1,12 @@
+import { Game } from "../main";
+
 export interface Coordinates {
     x: number;
     y: number;
 }
 
 export interface GameObjectInterface {
+    game?: Game
     context: CanvasRenderingContext2D;
     imagePath: string;
     x: number;

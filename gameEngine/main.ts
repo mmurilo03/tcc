@@ -21,6 +21,7 @@ export class Game {
         this.context = this.canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
         this.player = new Wolf({
+            game: this,
             context: this.context,
             x: 250,
             y: 250,

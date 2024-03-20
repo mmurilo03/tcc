@@ -7,11 +7,11 @@ function App() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
         event.preventDefault();
-        game.addInput(event.key);
+        game.addInput(event.key.toLowerCase());
     };
     const handleKeyUp = (event: KeyboardEvent) => {
         event.preventDefault();
-        game.removeInput(event.key);
+        game.removeInput(event.key.toLowerCase());
     };
 
     useEffect(() => {
