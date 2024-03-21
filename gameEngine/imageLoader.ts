@@ -2,6 +2,9 @@ import * as fs from "fs";
 import jsdom from "jsdom";
 import { createCanvas, loadImage } from "canvas";
 import { HitboxMaker } from "./GameObject/HitboxMaker";
+import { exports } from "./exports.json";
+
+const reset = process.argv.includes("reset");
 
 const { JSDOM } = jsdom;
 const fakeDOM = new JSDOM(
@@ -47,7 +50,7 @@ const getFilesAndFolders = (path: string, files: string[], out: string[]) => {
 
 getFilesAndFolders(fsPathToGameFiles, files, filePaths);
 
-filePaths.forEach(async (file) => {    
+filePaths.forEach(async (file) => {
     const importedClass = await import(file.replace("/gameEngine", ""));
     const keys = Object.keys(importedClass);
     keys.forEach(async (key) => {
@@ -55,18 +58,35 @@ filePaths.forEach(async (file) => {
         const width = currentClass.width;
         const height = currentClass.height;
         const imagePath = currentClass.imagePath;
-        `${fsPathToGameImages}/${imagePath}`
-        if (width && height && imagePath && fs.existsSync(`${fsPathToGameImages}/${imagePath}`)) {
-            const image = await loadImage(`${fsPathToGameImages}/${imagePath}`);
-            const hitboxMaker = new HitboxMaker(
-                {
-                    context: context,
-                    width: width,
-                    height: height,
-                    imagePath: imagePath,
-                },
-                image
-            );
+        console.log(`${imagePath} ${Object.keys(exports).includes(imagePath)}`);
+        if (reset) {
+            if (width && height && imagePath && fs.existsSync(`${fsPathToGameImages}/${imagePath}`)) {
+                const image = await loadImage(`${fsPathToGameImages}/${imagePath}`);
+                const hitboxMaker = new HitboxMaker(
+                    {
+                        context: context,
+                        width: width,
+                        height: height,
+                        imagePath: imagePath,
+                    },
+                    image
+                );
+            }
+        } else if (!Object.keys(exports).includes(imagePath)) {
+            if (width && height && imagePath && fs.existsSync(`${fsPathToGameImages}/${imagePath}`)) {
+                const image = await loadImage(`${fsPathToGameImages}/${imagePath}`);
+                const hitboxMaker = new HitboxMaker(
+                    {
+                        context: context,
+                        width: width,
+                        height: height,
+                        imagePath: imagePath,
+                    },
+                    image
+                );
+            }
+        } else {
+            console.log(`Already exported: ${fsPathToGameImages}/${imagePath}`);
         }
     });
 });
