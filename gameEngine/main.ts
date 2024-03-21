@@ -1,6 +1,7 @@
 import { GameObject } from "./GameObject/GameObject.ts";
 import { Dimensions } from "./Interfaces/Dimensions.ts";
 import { Wolf } from "./GameClasses/Wolf.ts";
+import { Floor } from "./GameClasses/Floor/Floor.ts";
 
 export class Game {
     width: number;
@@ -31,14 +32,12 @@ export class Game {
     addInput(key: string) {
         if (this.inputs.includes(key)) return;
         this.inputs.push(key);
-        console.log(this.inputs);
         
     }
 
     removeInput(key: string) {
         if (!this.inputs.includes(key)) return;
         this.inputs.splice(this.inputs.indexOf(key), 1)
-        console.log(this.inputs);
     }
 
     update() {

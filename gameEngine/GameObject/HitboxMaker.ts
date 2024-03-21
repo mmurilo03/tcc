@@ -43,11 +43,13 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
     eraseImage(outline: Coordinates[]) {
         outline.forEach((element) => {
             let endPixel = [element.x, 0];
-            for (let i = element.y + 1; i < this.height; i++) {
+            let i = element.y + 1;
+            for (i; i < this.height; i++) {
                 if (this.search({ x: endPixel[0], y: i }, outline)) {
-                    this.context.clearRect(endPixel[0], element.y, 1, i);
+                    break;
                 }
             }
+            this.context.clearRect(endPixel[0], element.y, 1, i);
         });
     }
 
