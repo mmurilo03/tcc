@@ -21,6 +21,9 @@ export class Floor extends GameObject {
             height: Floor.height,
             width: Floor.width,
             imagePath: Floor.imagePath,
+        }, {
+            state: "idle",
+            animationFrames: { "idle": {start: 0, end: 0, duration: 0}}
         });
     }
 }

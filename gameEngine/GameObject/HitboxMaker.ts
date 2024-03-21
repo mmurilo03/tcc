@@ -19,7 +19,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
     // Array with each outline of a frame
     // Array of points
     hitboxes: string[][][];
-    animationFrame: Coordinates[];
+    animationImagePosition: Coordinates[];
 
     width: number;
     height: number;
@@ -33,7 +33,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         this.hitboxCount = 0;
         this.activeFrame = 0;
         this.hitboxes = []; // points of the hitbox
-        this.animationFrame = []; // animation frame count per line on image
+        this.animationImagePosition = []; // animation frame count per line on image
 
         this.imageElement = image;
         this.countHitboxes();
@@ -83,7 +83,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
                 const o = pixels[i + 3];
 
                 if (o > 0) {
-                    this.animationFrame.push({ x: positionX, y: positionY });
+                    this.animationImagePosition.push({ x: positionX, y: positionY });
                     this.hitboxCount++;
                     break;
                 }
@@ -113,8 +113,8 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             this.context.clearRect(0, 0, this.width, this.height);
             this.context.drawImage(
                 this.imageElement,
-                this.animationFrame[c].x,
-                this.animationFrame[c].y,
+                this.animationImagePosition[c].x,
+                this.animationImagePosition[c].y,
                 this.width,
                 this.height,
                 0,
@@ -170,7 +170,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         exports[`${this.imagePath}`] = {
             hitboxCount: this.hitboxCount,
             hitboxes: this.hitboxes,
-            animationFrame: this.animationFrame,
+            animationImagePosition: this.animationImagePosition,
         };
         writeJsonFile("./gameEngine/exports.json", { exports: exports });
     }

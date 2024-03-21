@@ -1,30 +1,36 @@
-import { Coordinates, GameObjectInterface, GameObjectProperties } from "../Interfaces/GameObjectInterfaces";
+import { AnimationFrame, Coordinates, GameObjectInterface, GameObjectHiddenProperties, GameObjectProperties } from "../Interfaces/GameObjectInterfaces";
 import { exports } from "../exports.json";
 import { Game } from "../main";
 
-export class GameObject implements GameObjectInterface, GameObjectProperties {
+export class GameObject implements GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties {
+    // GameObjectInterface
     game?: Game;
     context: CanvasRenderingContext2D;
     imagePath: string;
-    imageElement: HTMLImageElement;
     x: number;
     y: number;
+    width: number;
+    height: number;
+
+    // GameObjectHiddenProperties
+    imageElement: HTMLImageElement;
     loading: boolean = true;
     hitboxCount: number;
     activeFrame: number;
     frameCounter: number;
     flip: boolean;
-
     // Array with frames
     // Array with each outline of a frame
     // Array of points
     hitboxes: string[][][];
-    animationFrame: Coordinates[];
+    animationImagePosition: Coordinates[];
+    
+    // GameObjectProperties
+    state: string;
+    animationFrames: AnimationFrame;
+    previousState: string;
 
-    width: number;
-    height: number;
-
-    constructor(gameObjectInterface: GameObjectInterface) {
+    constructor(gameObjectInterface: GameObjectInterface, gameObjectProperties: GameObjectProperties) {
         this.game = gameObjectInterface.game;
         this.context = gameObjectInterface.context;
         this.imagePath = gameObjectInterface.imagePath;
@@ -40,8 +46,10 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
         this.frameCounter = 0;
         this.flip = false;
         this.hitboxes = []; // points of the hitbox
-        this.animationFrame = []; // animation frame count per line on image
-
+        this.animationImagePosition = []; // animation frame count per line on image
+        this.state = gameObjectProperties.state;
+        this.previousState = gameObjectProperties.state;
+        this.animationFrames = gameObjectProperties.animationFrames;
         const img = new Image();
         this.imageElement = img;
 
@@ -55,36 +63,40 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     loadFromExport() {
         this.hitboxCount = exports[this.imagePath as keyof typeof exports]?.hitboxCount;
         this.hitboxes = exports[this.imagePath as keyof typeof exports]?.hitboxes;
-        this.animationFrame = exports[this.imagePath as keyof typeof exports]?.animationFrame;
+        this.animationImagePosition = exports[this.imagePath as keyof typeof exports]?.animationImagePosition;
 
-        if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationFrame.length > 0) {
+        if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
             this.loading = false;
         }
     }
 
-    update(n: number) {
-        this.x += n;
-        // this.frameCounter++;
+    update(attribute: any) {
+        this.frameCounter++;
+        
+        if (this.state != this.previousState) {
+            this.previousState = this.state;
+            this.activeFrame = this.animationFrames[this.state].start;
+        }
+        if (this.frameCounter > this.animationFrames[this.state].duration) {
+            this.frameCounter = 0;
+            this.activeFrame++;
+            if (this.activeFrame > this.animationFrames[this.state].end) {
+                this.activeFrame = this.animationFrames[this.state].start;
+            }
+        }
     }
 
     draw() {
         if (this.flip) {
             this.context.setTransform(-1, 0, 0, 1, 500 + this.x / 2, 0);
         }
-        if (this.frameCounter > 4) {
-            this.frameCounter = 0;
-            this.activeFrame++;
-            if (this.activeFrame >= this.hitboxCount) {
-                this.activeFrame = 0;
-            }
-        }
         this.context.fillStyle = "red";
         this.context.strokeStyle = "red";
 
         this.context.drawImage(
             this.imageElement,
-            this.animationFrame[this.activeFrame].x,
-            this.animationFrame[this.activeFrame].y,
+            this.animationImagePosition[this.activeFrame].x,
+            this.animationImagePosition[this.activeFrame].y,
             this.width,
             this.height,
             this.x,
@@ -112,8 +124,8 @@ export class GameObject implements GameObjectInterface, GameObjectProperties {
     drawSimple() {
         this.context.drawImage(
             this.imageElement,
-            this.animationFrame[this.activeFrame].x,
-            this.animationFrame[this.activeFrame].y,
+            this.animationImagePosition[this.activeFrame].x,
+            this.animationImagePosition[this.activeFrame].y,
             this.width,
             this.height,
             this.x,

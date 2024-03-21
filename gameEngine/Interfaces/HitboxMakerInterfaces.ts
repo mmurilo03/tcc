@@ -17,5 +17,5 @@ export interface HitboxMakerProperties {
     hitboxCount: number;
     activeFrame: number;
     hitboxes: Array<Array<Array<string>>>;
-    animationFrame?: Array<Coordinates>;
+    animationImagePosition: Array<Coordinates>;
 }

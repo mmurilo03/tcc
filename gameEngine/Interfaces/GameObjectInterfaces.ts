@@ -15,7 +15,8 @@ export interface GameObjectInterface {
     height: number;
 }
 
-export interface GameObjectProperties {
+
+export interface GameObjectHiddenProperties {
     imageElement: HTMLImageElement;
     loading: boolean;
     hitboxCount: number;
@@ -23,5 +24,15 @@ export interface GameObjectProperties {
     frameCounter: number;
     flip: boolean;
     hitboxes: Array<Array<Array<string>>>;
-    animationFrame?: Array<Coordinates>;
+    animationImagePosition: Array<Coordinates>;
+}
+
+export interface AnimationFrame {
+    [propName: string] : {start: number, end: number, duration: number}
+}
+
+export interface GameObjectProperties {
+    state: string;
+    animationFrames: AnimationFrame;
+    previousState?: string;
 }
