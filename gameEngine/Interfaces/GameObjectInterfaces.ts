@@ -6,7 +6,7 @@ export interface Coordinates {
 }
 
 export interface GameObjectInterface {
-    game?: Game
+    game?: Game;
     context: CanvasRenderingContext2D;
     imagePath: string;
     x: number;
@@ -14,7 +14,6 @@ export interface GameObjectInterface {
     width: number;
     height: number;
 }
-
 
 export interface GameObjectHiddenProperties {
     imageElement: HTMLImageElement;
@@ -28,7 +27,7 @@ export interface GameObjectHiddenProperties {
 }
 
 export interface AnimationFrame {
-    [propName: string] : {start: number, end: number, duration: number}
+    [propName: string]: { start: number; end: number; duration: number };
 }
 
 export interface GameObjectProperties {

@@ -8,7 +8,9 @@ import {
 import { exports } from "../exports.json";
 import { Game } from "../main";
 
-export class GameObject implements GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties {
+export class GameObjectStatic
+    implements GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
+{
     // GameObjectInterface
     game?: Game;
     context: CanvasRenderingContext2D;
@@ -36,7 +38,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties, Ga
     animationFrames: AnimationFrame;
     previousState: string;
 
-    constructor(gameObjectInterface: GameObjectInterface, gameObjectProperties: GameObjectProperties) {
+    constructor(gameObjectInterface: GameObjectInterface) {
         this.game = gameObjectInterface.game;
         this.context = gameObjectInterface.context;
         this.imagePath = gameObjectInterface.imagePath;
@@ -53,9 +55,9 @@ export class GameObject implements GameObjectInterface, GameObjectProperties, Ga
         this.flip = false;
         this.hitboxes = []; // points of the hitbox
         this.animationImagePosition = []; // animation frame count per line on image
-        this.state = gameObjectProperties.state;
-        this.previousState = gameObjectProperties.state;
-        this.animationFrames = gameObjectProperties.animationFrames;
+        this.state = "static";
+        this.previousState = "static";
+        this.animationFrames = {"static": { start: 0, end: 0, duration: 0}};
         const img = new Image();
         this.imageElement = img;
 
@@ -77,19 +79,7 @@ export class GameObject implements GameObjectInterface, GameObjectProperties, Ga
     }
 
     update(attribute: any) {
-        this.frameCounter++;
-
-        if (this.state != this.previousState) {
-            this.previousState = this.state;
-            this.activeFrame = this.animationFrames[this.state].start;
-        }
-        if (this.frameCounter > this.animationFrames[this.state].duration) {
-            this.frameCounter = 0;
-            this.activeFrame++;
-            if (this.activeFrame > this.animationFrames[this.state].end) {
-                this.activeFrame = this.animationFrames[this.state].start;
-            }
-        }
+        
     }
 
     draw() {

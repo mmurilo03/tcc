@@ -1,4 +1,4 @@
-import { GameObject } from "../../GameObject/GameObject";
+import { GameObjectStatic } from "../../GameObject/GameObjectStatic";
 import { Game } from "../../main";
 
 interface FloorProps {
@@ -8,7 +8,7 @@ interface FloorProps {
     y: number;
 }
 
-export class Floor extends GameObject {
+export class Floor extends GameObjectStatic {
     static imagePath: string = "floor.png";
     static width: number = 100;
     static height: number = 10;
@@ -21,9 +21,6 @@ export class Floor extends GameObject {
             height: Floor.height,
             width: Floor.width,
             imagePath: Floor.imagePath,
-        }, {
-            state: "idle",
-            animationFrames: { "idle": {start: 0, end: 0, duration: 0}}
         });
     }
 }
