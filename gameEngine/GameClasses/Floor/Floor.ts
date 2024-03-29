@@ -1,5 +1,5 @@
 import { GameObjectStatic } from "../../GameObject/GameObjectStatic";
-import { Game } from "../../main";
+import { Game } from "../../Game";
 
 interface FloorProps {
     game: Game;

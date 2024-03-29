@@ -1,4 +1,4 @@
-import { Game } from "../main";
+import { Game } from "../Game";
 
 export interface Coordinates {
     x: number;

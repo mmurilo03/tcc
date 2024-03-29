@@ -7,7 +7,7 @@ import {
     GameObjectDraw,
 } from "../Interfaces/GameObjectInterfaces";
 import { exports } from "../exports.json";
-import { Game } from "../main";
+import { Game } from "../Game";
 
 export class GameObject implements GameObjectDraw, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties {
     // GameObjectInterface

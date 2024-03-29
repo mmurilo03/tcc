@@ -1,5 +1,5 @@
 import { GameObject } from "../GameObject/GameObject";
-import { Game } from "../main";
+import { Game } from "../Game";
 
 interface WolfProps {
     game: Game;
