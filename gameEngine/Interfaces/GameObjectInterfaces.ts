@@ -6,7 +6,7 @@ export interface Coordinates {
 }
 
 export interface GameObjectInterface {
-    game?: Game;
+    game: Game;
     context: CanvasRenderingContext2D;
     imagePath: string;
     x: number;
@@ -17,7 +17,6 @@ export interface GameObjectInterface {
 
 export interface GameObjectHiddenProperties {
     imageElement: HTMLImageElement;
-    loading: boolean;
     hitboxCount: number;
     activeFrame: number;
     frameCounter: number;
@@ -34,4 +33,10 @@ export interface GameObjectProperties {
     state: string;
     animationFrames: AnimationFrame;
     previousState?: string;
+}
+
+export interface GameObjectDraw {
+    loading: boolean;
+    update(attribute: any): any;
+    draw(): void;
 }

@@ -2,7 +2,7 @@ import { GameObjectStatic } from "../../GameObject/GameObjectStatic";
 import { Game } from "../../main";
 
 interface FloorProps {
-    game?: Game;
+    game: Game;
     context: CanvasRenderingContext2D;
     x: number;
     y: number;

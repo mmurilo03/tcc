@@ -2,7 +2,7 @@ import { GameObject } from "../GameObject/GameObject";
 import { Game } from "../main";
 
 interface WolfProps {
-    game?: Game;
+    game: Game;
     context: CanvasRenderingContext2D;
     x: number;
     y: number;

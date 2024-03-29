@@ -4,15 +4,16 @@ import {
     GameObjectInterface,
     GameObjectHiddenProperties,
     GameObjectProperties,
+    GameObjectDraw,
 } from "../Interfaces/GameObjectInterfaces";
 import { exports } from "../exports.json";
 import { Game } from "../main";
 
 export class GameObjectStatic
-    implements GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
+    implements GameObjectDraw, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
 {
     // GameObjectInterface
-    game?: Game;
+    game: Game;
     context: CanvasRenderingContext2D;
     imagePath: string;
     x: number;
