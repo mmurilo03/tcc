@@ -1,16 +1,18 @@
-import { GameObject } from "./GameObject/GameObject.ts";
 import { Dimensions } from "./Interfaces/Dimensions.ts";
-import { Wolf } from "./GameClasses/Wolf.ts";
-import { Floor } from "./GameClasses/Floor/Floor.ts";
+import { Stage } from "./GameStages/Stage.ts";
+
+interface Stages {
+    [propName: string]: Stage;
+}
 
 export class Game {
     width: number;
     height: number;
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
-    player: GameObject;
-    loading: boolean = true;
     inputs: string[] = [];
+    stages: Stages = {};
+    activeStage?: Stage;
 
     constructor({ width, height }: Dimensions) {
         this.width = width;
@@ -20,35 +22,29 @@ export class Game {
         this.canvas.width = width;
         this.canvas.height = height;
         this.context = this.canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
-
-        this.player = new Wolf({
-            game: this,
-            context: this.context,
-            x: 250,
-            y: 250,
-        });
     }
 
     addInput(key: string) {
         if (this.inputs.includes(key)) return;
         this.inputs.push(key);
-        
     }
 
     removeInput(key: string) {
         if (!this.inputs.includes(key)) return;
-        this.inputs.splice(this.inputs.indexOf(key), 1)
+        this.inputs.splice(this.inputs.indexOf(key), 1);
     }
 
     update() {
-        if (!this.player.loading) {
-            this.player.update(0);
+        if (this.activeStage) {
+            this.activeStage.update();
         }
     }
 
-    draw() {
-        if (!this.player.loading) {
-            this.player.draw();
-        }
+    addStage(stage: Stage) {
+        this.stages[stage.name] = stage;
+    }
+
+    changeStage(name: string) {
+        this.activeStage = this.stages[name];
     }
 }

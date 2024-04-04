@@ -14,6 +14,19 @@ function App() {
         game.removeInput(event.key.toLowerCase());
     };
 
+    const changeStage = () => {
+        const currentStage = game.activeStage?.name;
+        if (currentStage) {
+            const stages = Object.keys(game.stages);
+            const position = stages.indexOf(currentStage);
+            if (position + 1 >= stages.length) {
+                game.changeStage(stages[0]);
+            } else {
+                game.changeStage(stages[position + 1]);
+            }
+        }
+    };
+
     useEffect(() => {
         if (!canvasRef.current) return;
         canvasRef.current.replaceChildren(game.canvas);
@@ -30,6 +43,7 @@ function App() {
     return (
         <>
             <div className="canvas" ref={canvasRef}></div>
+            <button onClick={changeStage}>Change</button>
         </>
     );
 }
