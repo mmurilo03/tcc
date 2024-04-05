@@ -15,6 +15,7 @@ export class Floor extends GameObjectStatic {
     constructor({ game, context, x, y }: FloorProps) {
         super({
             game: game,
+            objId: `${Math.floor(Math.random() * 100000)}`,
             context: context,
             x: x,
             y: y,

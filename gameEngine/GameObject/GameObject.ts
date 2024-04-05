@@ -12,6 +12,7 @@ import { Game } from "../Game";
 export class GameObject implements GameObjectDraw, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties {
     // GameObjectInterface
     game: Game;
+    objId: string;
     context: CanvasRenderingContext2D;
     imagePath: string;
     x: number;
@@ -39,6 +40,7 @@ export class GameObject implements GameObjectDraw, GameObjectInterface, GameObje
 
     constructor(gameObjectInterface: GameObjectInterface, gameObjectProperties: GameObjectProperties) {
         this.game = gameObjectInterface.game;
+        this.objId = gameObjectInterface.objId;
         this.context = gameObjectInterface.context;
         this.imagePath = gameObjectInterface.imagePath;
         this.x = gameObjectInterface.x;

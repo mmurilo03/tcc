@@ -14,6 +14,7 @@ export class GameObjectStatic
 {
     // GameObjectInterface
     game: Game;
+    objId: string;
     context: CanvasRenderingContext2D;
     imagePath: string;
     x: number;
@@ -41,6 +42,7 @@ export class GameObjectStatic
 
     constructor(gameObjectInterface: GameObjectInterface) {
         this.game = gameObjectInterface.game;
+        this.objId = gameObjectInterface.objId;
         this.context = gameObjectInterface.context;
         this.imagePath = gameObjectInterface.imagePath;
         this.x = gameObjectInterface.x;
@@ -58,7 +60,7 @@ export class GameObjectStatic
         this.animationImagePosition = []; // animation frame count per line on image
         this.state = "static";
         this.previousState = "static";
-        this.animationFrames = {"static": { start: 0, end: 0, duration: 0}};
+        this.animationFrames = { static: { start: 0, end: 0, duration: 0 } };
         const img = new Image();
         this.imageElement = img;
 
@@ -79,9 +81,7 @@ export class GameObjectStatic
         }
     }
 
-    update(attribute: any) {
-        
-    }
+    update(attribute: any) {}
 
     draw() {
         if (this.flip) {

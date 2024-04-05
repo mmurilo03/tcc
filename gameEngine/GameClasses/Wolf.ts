@@ -16,6 +16,7 @@ export class Wolf extends GameObject {
         super(
             {
                 game: game,
+                objId: `${Math.floor(Math.random()*100000)}`,
                 context: context,
                 x,
                 y,
