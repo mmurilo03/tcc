@@ -13,6 +13,7 @@ export class Game {
     inputs: string[] = [];
     stages: Stages = {};
     activeStage?: Stage;
+    globalObjects: Stage = new Stage(this, "global");
 
     constructor({ width, height }: Dimensions) {
         this.width = width;
@@ -38,10 +39,15 @@ export class Game {
         if (this.activeStage) {
             this.activeStage.update();
         }
+        this.globalObjects.update();
     }
 
     addStage(stage: Stage) {
-        this.stages[stage.name] = stage;
+        if (stage.name == "global") {
+            this.globalObjects = stage
+        } else {
+            this.stages[stage.name] = stage;
+        }
     }
 
     changeStage(name: string) {

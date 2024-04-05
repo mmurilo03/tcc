@@ -5,6 +5,6 @@ import { Stage } from "../Stage";
 export class Stage2 extends Stage {
     constructor(game: Game) {
         super(game, "Stage 2");
-        this.add(new Floor({ game: game, context: game.context, x: 250, y: 250 }));
+        this.add(new Floor({ game: game, context: game.context, x: 250, y: 350 }));
     }
 }
