@@ -5,6 +5,11 @@ interface Stages {
     [propName: string]: Stage;
 }
 
+interface MousePos {
+    mouseX: number;
+    mouseY: number;
+}
+
 export class Game {
     width: number;
     height: number;
@@ -14,6 +19,8 @@ export class Game {
     stages: Stages = {};
     activeStage?: Stage;
     globalObjects: Stage = new Stage(this, "global");
+    mousePos: MousePos = { mouseX: 0, mouseY: 0 };
+    mouseClick: boolean = false;
 
     constructor({ width, height }: Dimensions) {
         this.width = width;
@@ -44,7 +51,7 @@ export class Game {
 
     addStage(stage: Stage) {
         if (stage.name == "global") {
-            this.globalObjects = stage
+            this.globalObjects = stage;
         } else {
             this.stages[stage.name] = stage;
         }
@@ -52,5 +59,19 @@ export class Game {
 
     changeStage(name: string) {
         this.activeStage = this.stages[name];
+    }
+
+    updateMousePos(newPos: MousePos) {
+        this.mousePos = newPos;
+    }
+
+    mouseDown() {
+        this.mouseClick = true;
+        console.log(this.mouseClick);
+    }
+
+    mouseUp() {
+        this.mouseClick = false;
+        console.log(this.mouseClick);
     }
 }
