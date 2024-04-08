@@ -14,7 +14,7 @@ export class Stage {
     update() {
         for (let i = 0; i < this.stageObjects.length; i++) {
             if (!this.stageObjects[i].loading) {
-                this.stageObjects[i].update("");
+                this.stageObjects[i].update();
                 this.stageObjects[i].draw();
             }
         }

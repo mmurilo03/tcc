@@ -38,6 +38,6 @@ export interface GameObjectProperties {
 
 export interface GameObjectDraw {
     loading: boolean;
-    update(attribute: any): any;
+    update(): any;
     draw(): void;
 }

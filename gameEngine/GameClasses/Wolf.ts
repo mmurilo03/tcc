@@ -43,7 +43,7 @@ export class Wolf extends GameObject {
     }
 
     update() {
-        super.update("");
+        super.update();
         if (!this.game?.inputs.includes("a") && !this.game?.inputs.includes("d")) {
             this.state = "idle";
         }

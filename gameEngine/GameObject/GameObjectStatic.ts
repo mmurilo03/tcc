@@ -81,7 +81,7 @@ export class GameObjectStatic
         }
     }
 
-    update(attribute: any) {}
+    update() {}
 
     draw() {
         if (this.flip) {

@@ -79,7 +79,7 @@ export class GameObject implements GameObjectDraw, GameObjectInterface, GameObje
         }
     }
 
-    update(attribute: any) {
+    update() {
         this.frameCounter++;
 
         if (this.state != this.previousState) {
