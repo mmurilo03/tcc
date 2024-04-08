@@ -43,10 +43,10 @@ export class Game {
     }
 
     update() {
+        this.globalObjects.update();
         if (this.activeStage) {
             this.activeStage.update();
         }
-        this.globalObjects.update();
     }
 
     addStage(stage: Stage) {
@@ -67,11 +67,9 @@ export class Game {
 
     mouseDown() {
         this.mouseClick = true;
-        console.log(this.mouseClick);
     }
 
     mouseUp() {
         this.mouseClick = false;
-        console.log(this.mouseClick);
     }
 }

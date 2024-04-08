@@ -12,7 +12,7 @@ export class Stage {
     }
 
     update() {
-        for (let i = 0; i < this.stageObjects.length; i++) {
+        for (let i = this.stageObjects.length-1; i >= 0; i--) {
             if (!this.stageObjects[i].loading) {
                 this.stageObjects[i].update();
                 this.stageObjects[i].draw();
