@@ -61,7 +61,7 @@ function App() {
     return (
         <>
             <div className="outline">
-                <div ref={canvasRef} onMouseMove={handleMouseMove} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}></div>
+                <div className="canvas" ref={canvasRef} onMouseMove={handleMouseMove} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}></div>
             </div>
             <button onClick={changeStage}>Change</button>
         </>
