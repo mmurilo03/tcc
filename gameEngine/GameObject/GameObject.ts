@@ -9,7 +9,9 @@ import {
 import { exports } from "../exports.json";
 import { Game } from "../Game";
 
-export class GameObject implements GameObjectDraw, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties {
+export class GameObject
+    implements GameObjectDraw, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
+{
     // GameObjectInterface
     game: Game;
     objId: string;
@@ -97,7 +99,7 @@ export class GameObject implements GameObjectDraw, GameObjectInterface, GameObje
 
     draw() {
         if (this.flip) {
-            this.context.setTransform(-1, 0, 0, 1, 500 + this.x / 2, 0);
+            this.context.scale(-1, 1);
         }
         this.context.fillStyle = "red";
         this.context.strokeStyle = "red";
@@ -108,7 +110,7 @@ export class GameObject implements GameObjectDraw, GameObjectInterface, GameObje
             this.animationImagePosition[this.activeFrame].y,
             this.width,
             this.height,
-            this.x,
+            this.flip ? -this.x - this.width : this.x,
             this.y,
             this.width,
             this.height
@@ -118,7 +120,9 @@ export class GameObject implements GameObjectDraw, GameObjectInterface, GameObje
             let currentOutline = this.hitboxes[this.activeFrame][outline];
             // Draw the outline
             for (let i = 0; i < currentOutline.length; i++) {
-                const path = new Path2D(`M${this.x} ${this.y},${currentOutline[i]}`);
+                const path = new Path2D(
+                    `M${this.flip ? -this.x - this.width : this.x} ${this.y},${currentOutline[i]}`
+                );
 
                 // Makes the outline visible
                 // this.context.stroke(path);
@@ -126,7 +130,7 @@ export class GameObject implements GameObjectDraw, GameObjectInterface, GameObje
         }
         // this.context.fill();
         if (this.flip) {
-            this.context.setTransform(1, 0, 0, 1, 0, 0);
+            this.context.scale(-1, 1);
         }
     }
 

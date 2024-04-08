@@ -16,7 +16,7 @@ export class Wolf extends GameObject {
         super(
             {
                 game: game,
-                objId: `${Math.floor(Math.random()*100000)}`,
+                objId: `${Math.floor(Math.random() * 100000)}`,
                 context: context,
                 x,
                 y,
@@ -53,12 +53,14 @@ export class Wolf extends GameObject {
         ) {
             this.x -= 1;
             this.state = "running";
+            this.flip = true;
         } else if (
             this.game?.inputs.includes("d") &&
             this.game.inputs.indexOf("d") > this.game.inputs.indexOf("a")
         ) {
             this.x += 1;
             this.state = "running";
+            this.flip = false;
         }
     }
 }
