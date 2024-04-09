@@ -1,13 +1,9 @@
 import { Dimensions } from "./Interfaces/Dimensions.ts";
 import { Stage } from "./GameStages/Stage.ts";
+import { Coordinates } from "./Interfaces/GameObjectInterfaces.ts";
 
 interface Stages {
     [propName: string]: Stage;
-}
-
-interface MousePos {
-    mouseX: number;
-    mouseY: number;
 }
 
 export class Game {
@@ -19,7 +15,7 @@ export class Game {
     stages: Stages = {};
     activeStage?: Stage;
     globalObjects: Stage = new Stage(this, "global");
-    mousePos: MousePos = { mouseX: 0, mouseY: 0 };
+    mousePos: Coordinates = { x: 0, y: 0 };
     mouseClick: boolean = false;
 
     constructor({ width, height }: Dimensions) {
@@ -61,7 +57,7 @@ export class Game {
         this.activeStage = this.stages[name];
     }
 
-    updateMousePos(newPos: MousePos) {
+    updateMousePos(newPos: Coordinates) {
         this.mousePos = newPos;
     }
 

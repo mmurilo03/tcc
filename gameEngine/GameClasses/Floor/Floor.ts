@@ -22,6 +22,7 @@ export class Floor extends GameObjectStatic {
             height: Floor.height,
             width: Floor.width,
             imagePath: Floor.imagePath,
+            clickable: false
         });
     }
 }

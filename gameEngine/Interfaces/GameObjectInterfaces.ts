@@ -14,6 +14,7 @@ export interface GameObjectInterface {
     y: number;
     width: number;
     height: number;
+    clickable: boolean;
 }
 
 export interface GameObjectHiddenProperties {
@@ -24,6 +25,7 @@ export interface GameObjectHiddenProperties {
     flip: boolean;
     hitboxes: Array<Array<Array<string>>>;
     animationImagePosition: Array<Coordinates>;
+    clicked: boolean;
 }
 
 export interface AnimationFrame {

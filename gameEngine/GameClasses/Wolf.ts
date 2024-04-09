@@ -23,6 +23,7 @@ export class Wolf extends GameObject {
                 height: Wolf.height,
                 width: Wolf.width,
                 imagePath: Wolf.imagePath,
+                clickable: true
             },
             {
                 state: "idle",

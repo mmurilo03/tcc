@@ -20,7 +20,7 @@ function App() {
         if (canvasRef.current) {
             const offset = canvasRef.current.getBoundingClientRect();
 
-            game.updateMousePos({ mouseX: event.clientX - offset.left, mouseY: event.clientY - offset.top });
+            game.updateMousePos({ x: event.clientX - offset.left, y: event.clientY - offset.top });
         }
     };
 
