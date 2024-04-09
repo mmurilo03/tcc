@@ -1,4 +1,4 @@
-import { GameObject } from "../GameObject/GameObject";
+import { GameObjectDynamic } from "../GameObject/GameObjectDynamic";
 import { Game } from "../Game";
 
 interface WolfProps {
@@ -8,7 +8,7 @@ interface WolfProps {
     y: number;
 }
 
-export class Wolf extends GameObject {
+export class Wolf extends GameObjectDynamic {
     static imagePath: string = "playerTestImage.png";
     static height: number = 100;
     static width: number = 100;

@@ -85,21 +85,10 @@ export class GameObject
     }
 
     update() {
-        this.frameCounter++;
-
-        if (this.state != this.previousState) {
-            this.previousState = this.state;
-            this.activeFrame = this.animationFrames[this.state].start;
-        }
-        if (this.frameCounter > this.animationFrames[this.state].duration) {
-            this.frameCounter = 0;
-            this.activeFrame++;
-            if (this.activeFrame > this.animationFrames[this.state].end) {
-                this.activeFrame = this.animationFrames[this.state].start;
-            }
-        }
         if (this.clickable && this.game.mouseClick) {
             this.clicked = this.detectClick();
+        } else if (!this.game.mouseClick) {
+            this.clicked = false;
         }
     }
 
