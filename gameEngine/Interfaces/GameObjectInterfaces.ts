@@ -26,6 +26,8 @@ export interface GameObjectHiddenProperties {
     hitboxes: Array<Array<Array<string>>>;
     animationImagePosition: Array<Coordinates>;
     clicked: boolean;
+    highlight: boolean;
+    outline: string;
 }
 
 export interface AnimationFrame {

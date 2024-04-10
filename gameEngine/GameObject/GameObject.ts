@@ -29,8 +29,10 @@ export class GameObject
     hitboxCount: number;
     activeFrame: number;
     frameCounter: number;
-    flip: boolean;
+    flip: boolean = false;
     clicked: boolean = false;
+    highlight: boolean = false;
+    outline: string = "";
     // Array with frames
     // Array with each outline of a frame
     // Array of points
@@ -53,17 +55,16 @@ export class GameObject
         this.height = gameObjectInterface.height;
         this.clickable = gameObjectInterface.clickable;
 
-        this.loading = true;
+        this.state = gameObjectProperties.state;
+        this.previousState = gameObjectProperties.state;
+        this.animationFrames = gameObjectProperties.animationFrames;
 
         this.hitboxCount = 0;
         this.activeFrame = 0;
         this.frameCounter = 0;
-        this.flip = false;
+        // this.flip = false;
         this.hitboxes = []; // points of the hitbox
         this.animationImagePosition = []; // animation frame count per line on image
-        this.state = gameObjectProperties.state;
-        this.previousState = gameObjectProperties.state;
-        this.animationFrames = gameObjectProperties.animationFrames;
         const img = new Image();
         this.imageElement = img;
 
@@ -92,6 +93,20 @@ export class GameObject
         }
     }
 
+    updateOutline() {
+        // For each animation frame, get every outline and draw it
+        this.outline = `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
+        for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
+            let currentOutline = this.hitboxes[this.activeFrame][outline];
+            this.outline += currentOutline[0];
+        }
+    }
+
+    getOutline() {
+        this.updateOutline();
+        return this.outline;
+    }
+
     detectClick() {
         if (this.isPointClose(this.game.mousePos)) {
             return this.detectCollision(this.game.mousePos);
@@ -100,22 +115,17 @@ export class GameObject
     }
 
     detectCollision(point: Coordinates) {
-        this.context.fillStyle = "red";
-        this.context.strokeStyle = "red";
-        // For each animation frame, get every outline and draw it
-        for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
-            let currentOutline = this.hitboxes[this.activeFrame][outline];
-            // Draw the outline
-            for (let i = 0; i < currentOutline.length; i++) {
-                const path = new Path2D(
-                    `M${this.flip ? -this.x - this.width : this.x} ${this.y},${currentOutline[i]}`
-                );
-                // Makes the outline visible
-                // this.context.stroke(path);
-                if (this.context.isPointInPath(path, point.x, point.y)) return true;
-            }
-        }
+        if (this.context.isPointInPath(new Path2D(this.getOutline()), point.x, point.y)) return true;
         return false;
+    }
+
+    highlightObject() {
+        this.updateOutline();
+        this.highlight = true;
+    }
+
+    unhighlightObject() {
+        this.highlight = false;
     }
 
     isPointClose(point: Coordinates) {
@@ -142,6 +152,12 @@ export class GameObject
             this.width,
             this.height
         );
+        if (this.highlight) {
+            this.context.fillStyle = "red";
+            this.context.strokeStyle = "red";
+            const path = new Path2D(this.outline);
+            this.context.stroke(path);
+        }
         if (this.flip) {
             this.context.scale(-1, 1);
         }
