@@ -1,25 +1,18 @@
 import { GameObjectDynamic } from "../GameObject/GameObjectDynamic";
 import { Game } from "../Game";
-
-interface WolfProps {
-    game: Game;
-    context: CanvasRenderingContext2D;
-    x: number;
-    y: number;
-}
+import { ObjectProps } from "../Interfaces/GameObjectInterfaces";
 
 export class Wolf extends GameObjectDynamic {
     static imagePath: string = "playerTestImage.png";
     static height: number = 100;
     static width: number = 100;
-    constructor({ game, context, x, y }: WolfProps) {
+    constructor({ game, context, x, y }: ObjectProps) {
         super(
             {
-                game: game,
+                game, context, x, y
+            },
+            {
                 objId: `${Math.floor(Math.random() * 100000)}`,
-                context: context,
-                x,
-                y,
                 height: Wolf.height,
                 width: Wolf.width,
                 imagePath: Wolf.imagePath,

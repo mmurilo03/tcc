@@ -5,20 +5,27 @@ import {
     GameObjectHiddenProperties,
     GameObjectProperties,
     GameObjectDraw,
+    ObjectProps,
 } from "../Interfaces/GameObjectInterfaces";
 import { exports } from "../exports.json";
 import { Game } from "../Game";
 
 export class GameObject
-    implements GameObjectDraw, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
+    implements
+        ObjectProps,
+        GameObjectDraw,
+        GameObjectInterface,
+        GameObjectProperties,
+        GameObjectHiddenProperties
 {
-    // GameObjectInterface
+    // ObjectProps
     game: Game;
-    objId: string;
     context: CanvasRenderingContext2D;
-    imagePath: string;
     x: number;
     y: number;
+    // GameObjectInterface
+    objId: string;
+    imagePath: string;
     width: number;
     height: number;
     clickable: boolean = false;
@@ -44,13 +51,17 @@ export class GameObject
     animationFrames: AnimationFrame;
     previousState: string;
 
-    constructor(gameObjectInterface: GameObjectInterface, gameObjectProperties: GameObjectProperties) {
-        this.game = gameObjectInterface.game;
+    constructor(
+        objectProps: ObjectProps,
+        gameObjectInterface: GameObjectInterface,
+        gameObjectProperties: GameObjectProperties
+    ) {
+        this.game = objectProps.game;
+        this.context = objectProps.context;
+        this.x = objectProps.x;
+        this.y = objectProps.y;
         this.objId = gameObjectInterface.objId;
-        this.context = gameObjectInterface.context;
         this.imagePath = gameObjectInterface.imagePath;
-        this.x = gameObjectInterface.x;
-        this.y = gameObjectInterface.y;
         this.width = gameObjectInterface.width;
         this.height = gameObjectInterface.height;
         this.clickable = gameObjectInterface.clickable;

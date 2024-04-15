@@ -5,13 +5,16 @@ export interface Coordinates {
     y: number;
 }
 
-export interface GameObjectInterface {
+export interface ObjectProps {
     game: Game;
-    objId: string;
     context: CanvasRenderingContext2D;
-    imagePath: string;
     x: number;
     y: number;
+}
+
+export interface GameObjectInterface {
+    objId: string;
+    imagePath: string;
     width: number;
     height: number;
     clickable: boolean;

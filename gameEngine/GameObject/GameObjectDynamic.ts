@@ -1,9 +1,9 @@
-import { GameObjectInterface, GameObjectProperties } from "../Interfaces/GameObjectInterfaces";
+import { GameObjectInterface, GameObjectProperties, ObjectProps } from "../Interfaces/GameObjectInterfaces";
 import { GameObject } from "./GameObject";
 
 export class GameObjectDynamic extends GameObject {
-    constructor(gameObjectInterface: GameObjectInterface, gameObjectProperties: GameObjectProperties) {
-        super(gameObjectInterface, gameObjectProperties);
+    constructor(objectProps: ObjectProps, gameObjectInterface: GameObjectInterface, gameObjectProperties: GameObjectProperties) {
+        super(objectProps, gameObjectInterface, gameObjectProperties);
     }
 
     update() {
