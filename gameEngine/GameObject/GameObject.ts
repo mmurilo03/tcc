@@ -109,7 +109,7 @@ export class GameObject
         this.outline = `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
         for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
             let currentOutline = this.hitboxes[this.activeFrame][outline];
-            this.outline += currentOutline[0];
+            this.outline += currentOutline[0] + `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
         }
     }
 
