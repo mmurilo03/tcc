@@ -44,6 +44,9 @@ export interface GameObjectProperties {
 }
 
 export interface GameObjectDraw {
+    imagePath: string;
+    width: number;
+    height: number;
     loading: boolean;
     update(): any;
     draw(): void;

@@ -1,9 +1,37 @@
 import "./App.css";
 import { game } from "../gameEngine/main";
-import { MouseEvent, useEffect, useRef } from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
+import { HitboxMaker } from "../gameEngine/GameObject/HitboxMaker";
+
+const loadGame = async () => {
+    for (let obj of game.globalObjects.stageObjects) {
+        await new HitboxMaker().initialize({
+            context: game.context,
+            imagePath: obj.imagePath,
+            height: obj.height,
+            width: obj.width,
+        });
+    }
+
+    for (let stage in game.stages) {
+        let currentStage = game.stages[stage];
+        for (let obj of currentStage.stageObjects) {
+            await new HitboxMaker().initialize({
+                context: game.context,
+                imagePath: obj.imagePath,
+                height: obj.height,
+                width: obj.width,
+            });
+        }
+    }    
+    return false;
+};
 
 function App() {
     const canvasRef = useRef<HTMLDivElement>(null);
+
+    const [loading, setLoading] = useState(true);
+    const called = useRef(false);
 
     const handleKeyDown = (event: KeyboardEvent) => {
         event.preventDefault();
@@ -58,10 +86,33 @@ function App() {
         };
     });
 
+    useEffect(() => {
+        if(!called.current) {
+            loadGame().then(res => setLoading(res));
+            called.current = true;
+        }
+    }, []);
+
+    if (loading) {
+        return (
+            <>
+                <div className="outline">
+                    <h1>Loading</h1>
+                </div>
+            </>
+        );
+    }
+
     return (
         <>
             <div className="outline">
-                <div className="canvas" ref={canvasRef} onMouseMove={handleMouseMove} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}></div>
+                <div
+                    className="canvas"
+                    ref={canvasRef}
+                    onMouseMove={handleMouseMove}
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                ></div>
             </div>
             <button onClick={changeStage}>Change</button>
         </>

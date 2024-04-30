@@ -1,30 +1,50 @@
 import {
     Coordinates,
+    CoordinatesAsKey,
     HitboxMakerInterface,
     HitboxMakerProperties,
 } from "../Interfaces/HitboxMakerInterfaces";
-import { CanvasRenderingContext2D, Image } from "canvas";
-import { writeJsonFile } from "write-json-file";
 import paper from "paper";
 import { exports } from "../exports.json";
+import { api } from "../axios";
+
+interface DirectionPixels {
+    pixelLeft: number;
+    pixelUp: number;
+    pixelRight: number;
+    pixelDown: number;
+}
+
+interface DirectionCoords {
+    leftCoord: Coordinates;
+    upCoord: Coordinates;
+    rightCoord: Coordinates;
+    downCoord: Coordinates;
+}
 
 export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties {
-    context: CanvasRenderingContext2D;
-    imagePath: string;
-    imageElement: Image;
-    hitboxCount: number;
-    activeFrame: number;
+    context!: CanvasRenderingContext2D;
+    imagePath!: string;
+    width!: number;
+    height!: number;
+
+    imageElement!: HTMLImageElement;
+    hitboxCount!: number;
+    activeFrame!: number;
 
     // Array with frames
     // Array with each outline of a frame
     // Array of points
-    hitboxes: string[][][];
-    animationImagePosition: Coordinates[];
+    hitboxes!: string[][][];
+    animationImagePosition!: Coordinates[];
+    finalHitbox: { hitboxCount: number; hitboxes: string[][][]; animationImagePosition: Coordinates[] } = {
+        hitboxCount: 0,
+        hitboxes: [],
+        animationImagePosition: [],
+    };
+    loading: boolean = true;
 
-    width: number;
-    height: number;
-
-    constructor(hitboxMakerInterface: HitboxMakerInterface, image: Image) {
+    async initialize(hitboxMakerInterface: HitboxMakerInterface) {
         this.context = hitboxMakerInterface.context;
         this.width = hitboxMakerInterface.width;
         this.height = hitboxMakerInterface.height;
@@ -35,27 +55,40 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         this.hitboxes = []; // points of the hitbox
         this.animationImagePosition = []; // animation frame count per line on image
 
-        this.imageElement = image;
-        this.countHitboxes();
-        this.loadHitBox();
+        const img = new Image();
+        this.imageElement = img;
+
+        await new Promise((resolve, reject) => {
+            img.src = `./gameEngine/GameImages/${this.imagePath}`;
+            img.onload = async () => {
+                this.imageElement = img;
+                if (!Object.keys(exports).includes(this.imagePath)) {
+                    this.countHitboxes();
+                    await this.loadHitBox();
+                }
+                resolve("done");
+            };
+            img.onerror = reject;
+        });
+        return new HitboxMaker();
     }
 
-    eraseImage(outline: Coordinates[]) {
-        outline.forEach((element) => {
+    eraseImage(outline: Coordinates[], outlineUniqueKeys: CoordinatesAsKey) {
+        for (let element of outline) {
             let endPixel = [element.x, 0];
             let i = element.y + 1;
             for (i; i < this.height; i++) {
-                if (this.search({ x: endPixel[0], y: i }, outline)) {
+                if (this.searchByKeys({ x: endPixel[0], y: i }, outlineUniqueKeys)) {
                     break;
                 }
             }
             this.context.clearRect(endPixel[0], element.y, 1, i);
-        });
+        }
     }
 
     countHitboxes() {
-        console.log("Counting hitboxes and separating animation frames");
-        console.log(`Image: ${this.imagePath}`);
+        // console.log("Counting hitboxes and separating animation frames");
+        // console.log(`Image: ${this.imagePath}`);
         // Image size divided by object size
         let numberOfPossibleHitboxes =
             (this.imageElement.naturalHeight * this.imageElement.naturalWidth) / (this.height * this.width);
@@ -105,11 +138,11 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         console.log("HITBOX COUNT: ", this.hitboxCount);
     }
 
-    loadHitBox() {
-        console.log("Making hitbox outlines");
+    async loadHitBox() {
+        // console.log("Making hitbox outlines");
         let c = 0;
         while (c < this.hitboxCount) {
-            console.log(`Hitbox ${c + 1}/${this.hitboxCount}`);
+            // console.log(`Hitbox ${c + 1}/${this.hitboxCount}`);
             this.context.clearRect(0, 0, this.width, this.height);
             this.context.drawImage(
                 this.imageElement,
@@ -127,25 +160,112 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             let imgData = this.context.getImageData(0, 0, this.width, this.height);
             let pixels = imgData.data;
             let tempHitbox: Coordinates[] = [];
+            let tempHitboxUniqueKeys: CoordinatesAsKey = {};
             for (let pixel = 0; pixel <= pixels.length; pixel += 4) {
                 // Searching for pixels with opacity
                 const pixelOpacity = pixels[pixel + 3];
                 if (pixelOpacity > 0) {
-                    for (let i = pixel; i <= pixels.length; i += 4) {
-                        // If it finds a pixel, creates hitbox
-                        // const r = pixels[i];
-                        // const g = pixels[i+1];
-                        // const b = pixels[i+2];
-                        const o = pixels[i + 3];
-                        if (o > 0) {
-                            tempHitbox.push({
-                                x: (i / 4) % this.width,
-                                y: Math.floor(i / 4 / 100),
-                            });
+                    tempHitbox.push({
+                        x: (pixel / 4) % this.width,
+                        y: Math.floor(pixel / 4 / this.width),
+                    });
+
+                    let repetitions = 0;
+
+                    let index = pixel;
+                    let direction = "right";
+                    while (repetitions < 5) {
+                        // Gets the opacity of the pixels to each direction of the current pixel
+
+                        // const pixelCurrent = pixels[index + 3];
+                        const pixelLeft = pixels[index + 3 - 4] == undefined ? 0 : pixels[index + 3 - 4];
+                        const pixelUp =
+                            pixels[index + 3 - this.width * 4] == undefined
+                                ? 0
+                                : pixels[index + 3 - this.width * 4];
+                        const pixelRight = pixels[index + 3 + 4] == undefined ? 0 : pixels[index + 3 + 4];
+                        const pixelDown =
+                            pixels[index + 3 + this.width * 4] == undefined
+                                ? 0
+                                : pixels[index + 3 + this.width * 4];
+                        const directionPixels: DirectionPixels = {
+                            pixelLeft,
+                            pixelUp,
+                            pixelRight,
+                            pixelDown,
+                        };
+
+                        // Coordinates of each pixel
+                        const currentCoord: Coordinates = {
+                            x: (index / 4) % this.width,
+                            y: Math.floor(index / 4 / this.width),
+                        };
+                        const leftCoord: Coordinates = {
+                            x: ((index - 4) / 4) % this.width,
+                            y: Math.floor(index / 4 / this.width),
+                        };
+                        const upCoord: Coordinates = {
+                            x: (index / 4) % this.width,
+                            y: Math.floor((index - this.width * 4) / 4 / this.width),
+                        };
+                        const rightCoord: Coordinates = {
+                            x: ((index + 4) / 4) % this.width,
+                            y: Math.floor(index / 4 / this.width),
+                        };
+                        const downCoord: Coordinates = {
+                            x: (index / 4) % this.width,
+                            y: Math.floor((index + this.width * 4) / 4 / this.width),
+                        };
+
+                        const directionCoords: DirectionCoords = {
+                            leftCoord,
+                            upCoord,
+                            rightCoord,
+                            downCoord,
+                        };
+
+                        // If moving the pixel to the right makes X coordinate less than current coordinate, it means it should go down
+                        if (rightCoord.x < currentCoord.x) {
+                            direction = "down";
+                        }
+
+                        // If moving the pixel to the left makes X coordinate more than current coordinate, it means it should go up
+                        if (leftCoord.x > currentCoord.x) {
+                            direction = "up";
+                        }
+
+                        const values = this.drawOutline(
+                            direction,
+                            currentCoord,
+                            directionPixels,
+                            directionCoords,
+                            tempHitbox,
+                            index
+                        );
+
+                        direction = values.direction;
+                        index = values.index;
+                        // Gets newest Point
+                        let newPoint: Coordinates = tempHitbox[tempHitbox.length - 1];
+                        tempHitboxUniqueKeys[`${newPoint.x}-${newPoint.y}`] = newPoint;
+
+                        // If there are no points in the temporary hitbox, stop the loop
+                        if (!tempHitbox[repetitions]) {
+                            break;
+                        }
+
+                        // If the newest point repeats at the start of the temporary hitbox, count repetitions, else reset repetition
+                        if (
+                            tempHitbox[repetitions].x == newPoint.x &&
+                            tempHitbox[repetitions].y == newPoint.y
+                        ) {
+                            repetitions++;
+                        } else {
+                            repetitions = 0;
                         }
                     }
-                    tempHitbox = this.drawOutline(tempHitbox);
-                    this.eraseImage(tempHitbox);
+
+                    this.eraseImage(tempHitbox, tempHitboxUniqueKeys);
                     imgData = this.context.getImageData(0, 0, this.width, this.height);
                     pixels = imgData.data;
                     if (tempHitbox.length > 0) {
@@ -165,111 +285,134 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             }
             c++;
         }
-        // Draws current hitbox (comment)
-        // this.draw(this.context);
-        exports[`${this.imagePath}`] = {
+        this.finalHitbox = {
             hitboxCount: this.hitboxCount,
             hitboxes: this.hitboxes,
             animationImagePosition: this.animationImagePosition,
         };
-        writeJsonFile("./gameEngine/exports.json", { exports: exports });
+
+        await api.post("/objects", {
+            imagePath: this.imagePath,
+            hitboxCount: this.finalHitbox.hitboxCount,
+            hitboxes: this.finalHitbox.hitboxes,
+            animationImagePosition: this.finalHitbox.animationImagePosition
+        });
     }
 
-    drawOutline(arr: Coordinates[]) {
-        let newArr: Coordinates[] = [];
-        newArr.push(arr[0]); // First point of the outline
-        let direction = "right";
-        let count = 0;
-        for (let i = 0; i < arr.length; i++) {
-            const lastPoint: Coordinates = newArr[newArr.length - 1];
-            switch (direction) {
-                case "right":
-                    if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                        // look up
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                        direction = "up";
-                    } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                        // look right
-                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                        direction = "right";
-                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                        // look down
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                        direction = "down";
-                    } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                        // look left
-                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                        direction = "left";
-                    }
-                    break;
-                case "down":
-                    if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                        // look right
-                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                        direction = "right";
-                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                        // look down
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                        direction = "down";
-                    } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                        // look left
-                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                        direction = "left";
-                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                        // look up
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                        direction = "up";
-                    }
-                    break;
-                case "up":
-                    if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                        // look left
-                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                        direction = "left";
-                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                        // look up
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                        direction = "up";
-                    } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                        // look right
-                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                        direction = "right";
-                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                        // look down
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                        direction = "down";
-                    }
-                    break;
-                case "left":
-                    if (this.search({ x: lastPoint.x, y: lastPoint.y + 1 }, arr)) {
-                        // look down
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y + 1 });
-                        direction = "down";
-                    } else if (this.search({ x: lastPoint.x - 1, y: lastPoint.y }, arr)) {
-                        // look left
-                        newArr.push({ x: lastPoint.x - 1, y: lastPoint.y });
-                        direction = "left";
-                    } else if (this.search({ x: lastPoint.x, y: lastPoint.y - 1 }, arr)) {
-                        // look up
-                        newArr.push({ x: lastPoint.x, y: lastPoint.y - 1 });
-                        direction = "up";
-                    } else if (this.search({ x: lastPoint.x + 1, y: lastPoint.y }, arr)) {
-                        // look right
-                        newArr.push({ x: lastPoint.x + 1, y: lastPoint.y });
-                        direction = "right";
-                    }
-                    break;
-                default:
-                    break;
-            }
-            count++;
+    drawOutline(
+        direction: string,
+        currentCoord: Coordinates,
+        { pixelLeft, pixelUp, pixelRight, pixelDown }: DirectionPixels,
+        { leftCoord, upCoord, rightCoord, downCoord }: DirectionCoords,
+        arr: Coordinates[],
+        index: number
+    ) {
+        switch (direction) {
+            case "right":
+                if (pixelUp > 0) {
+                    // look up
+                    arr.push(upCoord);
+                    direction = "up";
+                    index -= this.width * 4;
+                } else if (pixelRight > 0) {
+                    // look right
+                    arr.push(rightCoord);
+                    direction = "right";
+                    index += 4;
+                } else if (pixelDown > 0) {
+                    // look down
+                    arr.push(downCoord);
+                    direction = "down";
+                    index += this.width * 4;
+                } else if (pixelLeft > 0) {
+                    // look left
+                    arr.push(leftCoord);
+                    direction = "left";
+                    index -= 4;
+                }
+                break;
+            case "down":
+                if (pixelRight && rightCoord.x > currentCoord.x) {
+                    // look right
+                    arr.push(rightCoord);
+                    direction = "right";
+                    index += 4;
+                } else if (pixelDown > 0) {
+                    // look down
+                    arr.push(downCoord);
+                    direction = "down";
+                    index += this.width * 4;
+                } else if (pixelLeft > 0) {
+                    // look left
+                    arr.push(leftCoord);
+                    direction = "left";
+                    index -= 4;
+                } else if (pixelUp > 0) {
+                    // look up
+                    arr.push(upCoord);
+                    direction = "up";
+                    index -= this.width * 4;
+                }
+                break;
+            case "up":
+                if (pixelLeft > 0 && leftCoord.x < currentCoord.x) {
+                    // look left
+                    arr.push(leftCoord);
+                    direction = "left";
+                    index -= 4;
+                } else if (pixelUp > 0) {
+                    // look up
+                    arr.push(upCoord);
+                    direction = "up";
+                    index -= this.width * 4;
+                } else if (pixelRight > 0) {
+                    // look right
+                    arr.push(rightCoord);
+                    direction = "right";
+                    index += 4;
+                } else if (pixelDown > 0) {
+                    // look down
+                    arr.push(downCoord);
+                    direction = "down";
+                    index += this.width * 4;
+                }
+                break;
+            case "left":
+                if (pixelDown > 0) {
+                    // look down
+                    arr.push(downCoord);
+                    direction = "down";
+                    index += this.width * 4;
+                } else if (pixelLeft > 0) {
+                    // look left
+                    arr.push(leftCoord);
+                    direction = "left";
+                    index -= 4;
+                } else if (pixelUp > 0) {
+                    // look up
+                    arr.push(upCoord);
+                    direction = "up";
+                    index -= this.width * 4;
+                } else if (pixelRight > 0) {
+                    // look right
+                    arr.push(rightCoord);
+                    direction = "right";
+                    index += 4;
+                }
+                break;
+            default:
+                break;
         }
-        return newArr;
+        return { direction, index };
     }
 
     search(point: Coordinates, arr: Coordinates[]) {
-        return arr.some((value) => {
-            return value.x == point.x && value.y == point.y;
-        });
+        for (let arrayPoint of arr) {
+            if (arrayPoint.x == point.x && arrayPoint.y == point.y) return true;
+        }
+    }
+
+    searchByKeys(point: Coordinates, arr: CoordinatesAsKey) {
+        return arr[`${point.x}-${point.y}`] == undefined ? false : true;
     }
 }
