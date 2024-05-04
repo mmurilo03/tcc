@@ -2,26 +2,29 @@ import "./App.css";
 import { game } from "../gameEngine/main";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { HitboxMaker } from "../gameEngine/GameObject/HitboxMaker";
+import { GameObject } from "../gameEngine/GameObject/GameObject";
+
+const buildImage = async (obj: GameObject) => {
+    await new HitboxMaker().initialize({
+        context: game.context,
+        imagePath: obj.imagePath,
+        height: obj.height,
+        width: obj.width,
+    });
+    for (let otherObj of obj.otherObjects) {
+        buildImage(otherObj);
+    }
+}
 
 const loadGame = async () => {
     for (let obj of game.globalObjects.stageObjects) {
-        await new HitboxMaker().initialize({
-            context: game.context,
-            imagePath: obj.imagePath,
-            height: obj.height,
-            width: obj.width,
-        });
+        await buildImage(obj)
     }
 
     for (let stage in game.stages) {
         let currentStage = game.stages[stage];
         for (let obj of currentStage.stageObjects) {
-            await new HitboxMaker().initialize({
-                context: game.context,
-                imagePath: obj.imagePath,
-                height: obj.height,
-                width: obj.width,
-            });
+            await buildImage(obj)
         }
     }    
     return false;
@@ -48,7 +51,7 @@ function App() {
         if (canvasRef.current) {
             const offset = canvasRef.current.getBoundingClientRect();
 
-            game.updateMousePos({ x: event.clientX - offset.left, y: event.clientY - offset.top });
+            game.updateMousePos({width: offset.width, height: offset.height},{ x: event.clientX - offset.left, y: event.clientY - offset.top });
         }
     };
 

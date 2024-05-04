@@ -1,8 +1,8 @@
-import { GameObjectDraw } from "../Interfaces/GameObjectInterfaces";
+import { GameObject } from "../GameObject/GameObject";
 import { Game } from "../Game";
 
 export class Stage {
-    stageObjects: GameObjectDraw[] = [];
+    stageObjects: GameObject[] = [];
     game: Game;
     name: string;
 
@@ -20,11 +20,11 @@ export class Stage {
         }
     }
 
-    add(obj: GameObjectDraw) {
+    add(obj: GameObject) {
         this.stageObjects.push(obj);
     }
 
-    remove(obj: GameObjectDraw) {
+    remove(obj: GameObject) {
         this.stageObjects.slice(this.stageObjects.indexOf(obj), 1);
     }
 }

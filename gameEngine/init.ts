@@ -1,0 +1,1 @@
+// File to make it so it can install tsx without messing up starting, kind of not needed but convenient

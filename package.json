@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "api": "npx tsx ./gameEngine/api.ts",
-    "dev": "npm-run-all --parallel dev2 api",
+    "dev": "npx tsx ./gameEngine/init.ts && npm-run-all --parallel dev2 api",
     "dev2": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
