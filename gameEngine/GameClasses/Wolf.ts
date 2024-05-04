@@ -12,7 +12,6 @@ export class Wolf extends GameObjectDynamic {
                 game, context, x, y
             },
             {
-                objId: `${Math.floor(Math.random() * 100000)}`,
                 height: Wolf.height,
                 width: Wolf.width,
                 imagePath: Wolf.imagePath,

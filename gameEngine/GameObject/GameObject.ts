@@ -24,7 +24,6 @@ export class GameObject
     x: number;
     y: number;
     // GameObjectInterface
-    objId: string;
     imagePath: string;
     width: number;
     height: number;
@@ -38,7 +37,7 @@ export class GameObject
     frameCounter: number;
     flip: boolean = false;
     clicked: boolean = false;
-    highlight: boolean = false;
+    highlighted: boolean = false;
     outline: string = "";
     // Array with frames
     // Array with each outline of a frame
@@ -50,6 +49,7 @@ export class GameObject
     state: string;
     animationFrames: AnimationFrame;
     previousState: string;
+    otherObjects: GameObject[] = [];
 
     constructor(
         objectProps: ObjectProps,
@@ -60,7 +60,6 @@ export class GameObject
         this.context = objectProps.context;
         this.x = objectProps.x;
         this.y = objectProps.y;
-        this.objId = gameObjectInterface.objId;
         this.imagePath = gameObjectInterface.imagePath;
         this.width = gameObjectInterface.width;
         this.height = gameObjectInterface.height;
@@ -132,11 +131,11 @@ export class GameObject
 
     highlightObject() {
         this.updateOutline();
-        this.highlight = true;
+        this.highlighted = true;
     }
 
     unhighlightObject() {
-        this.highlight = false;
+        this.highlighted = false;
     }
 
     isPointClose(point: Coordinates) {
@@ -163,7 +162,7 @@ export class GameObject
             this.width,
             this.height
         );
-        if (this.highlight) {
+        if (this.highlighted) {
             this.context.fillStyle = "red";
             this.context.strokeStyle = "red";
             const path = new Path2D(this.outline);

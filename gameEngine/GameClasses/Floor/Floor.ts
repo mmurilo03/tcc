@@ -15,7 +15,6 @@ export class Floor extends GameObjectStatic {
                 y,
             },
             {
-                objId: `${Math.floor(Math.random() * 100000)}`,
                 height: Floor.height,
                 width: Floor.width,
                 imagePath: Floor.imagePath,

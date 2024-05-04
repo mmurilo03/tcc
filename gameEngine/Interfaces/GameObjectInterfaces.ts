@@ -13,7 +13,6 @@ export interface ObjectProps {
 }
 
 export interface GameObjectInterface {
-    objId: string;
     imagePath: string;
     width: number;
     height: number;
@@ -29,7 +28,7 @@ export interface GameObjectHiddenProperties {
     hitboxes: Array<Array<Array<string>>>;
     animationImagePosition: Array<Coordinates>;
     clicked: boolean;
-    highlight: boolean;
+    highlighted: boolean;
     outline: string;
 }
 
