@@ -14,7 +14,6 @@
   border: 5px solid black;
   max-width: 100%;
   max-height: 90vh;
-  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,10 +21,10 @@
 
 .canvas {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 90vh;
 }
 
 .canvas * {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 90vh;
 }

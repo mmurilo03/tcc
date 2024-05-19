@@ -12,6 +12,7 @@ export interface HitboxMakerInterface {
     imagePath: string;
     width: number;
     height: number;
+    precision?: number;
 }
 
 export interface HitboxMakerProperties {

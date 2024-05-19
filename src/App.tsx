@@ -10,9 +10,10 @@ const buildImage = async (obj: GameObject) => {
         imagePath: obj.imagePath,
         height: obj.height,
         width: obj.width,
+        precision: obj.precision
     });
     for (let otherObj of obj.otherObjects) {
-        buildImage(otherObj);
+        await buildImage(otherObj);
     }
 }
 

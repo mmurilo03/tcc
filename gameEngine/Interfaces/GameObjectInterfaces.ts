@@ -10,6 +10,7 @@ export interface ObjectProps {
     context: CanvasRenderingContext2D;
     x: number;
     y: number;
+    precision?: number;
 }
 
 export interface GameObjectInterface {

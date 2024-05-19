@@ -23,6 +23,7 @@ export class GameObject
     context: CanvasRenderingContext2D;
     x: number;
     y: number;
+    precision: number = 2.5
     // GameObjectInterface
     imagePath: string;
     width: number;
@@ -39,6 +40,8 @@ export class GameObject
     clicked: boolean = false;
     highlighted: boolean = false;
     outline: string = "";
+    outlineColor: string = "red";
+    outlineWidth: number = 1;
     // Array with frames
     // Array with each outline of a frame
     // Array of points
@@ -60,6 +63,7 @@ export class GameObject
         this.context = objectProps.context;
         this.x = objectProps.x;
         this.y = objectProps.y;
+        this.precision = objectProps.precision ? objectProps.precision : 2.5;
         this.imagePath = gameObjectInterface.imagePath;
         this.width = gameObjectInterface.width;
         this.height = gameObjectInterface.height;
@@ -163,8 +167,9 @@ export class GameObject
             this.height
         );
         if (this.highlighted) {
-            this.context.fillStyle = "red";
-            this.context.strokeStyle = "red";
+            this.context.fillStyle = this.outlineColor;
+            this.context.strokeStyle = this.outlineColor;
+            this.context.lineWidth = this.outlineWidth;
             const path = new Path2D(this.outline);
             this.context.stroke(path);
         }

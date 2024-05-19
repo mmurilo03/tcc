@@ -27,6 +27,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
     imagePath!: string;
     width!: number;
     height!: number;
+    precision?: number = 2.5;
 
     imageElement!: HTMLImageElement;
     hitboxCount!: number;
@@ -49,6 +50,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         this.width = hitboxMakerInterface.width;
         this.height = hitboxMakerInterface.height;
         this.imagePath = hitboxMakerInterface.imagePath;
+        this.precision = hitboxMakerInterface.precision ? hitboxMakerInterface.precision : 10;
 
         this.hitboxCount = 0;
         this.activeFrame = 0;
@@ -273,7 +275,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
 
                         paper.setup(new paper.Size(1, 1));
                         const path = new paper.Path(tempHitbox);
-                        path.simplify(10);
+                        path.simplify(this.precision);
                         const simplePath = (path.exportSVG() as SVGElement)
                             .getAttribute("d")
                             ?.toLocaleLowerCase() as string;
@@ -285,17 +287,20 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             }
             c++;
         }
+
         this.finalHitbox = {
             hitboxCount: this.hitboxCount,
             hitboxes: this.hitboxes,
             animationImagePosition: this.animationImagePosition,
         };
 
-        await api.post("/objects", {
-            imagePath: this.imagePath,
-            hitboxCount: this.finalHitbox.hitboxCount,
-            hitboxes: this.finalHitbox.hitboxes,
-            animationImagePosition: this.finalHitbox.animationImagePosition
+        this.finalHitbox.hitboxes.forEach(async (hitbox) => {
+            await api.post("/objects", {
+                imagePath: this.imagePath,
+                hitboxCount: this.finalHitbox.hitboxCount,
+                hitbox: hitbox,
+                animationImagePosition: this.finalHitbox.animationImagePosition,
+            });
         });
     }
 
