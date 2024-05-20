@@ -57,7 +57,9 @@ export class Game {
         this.activeStage = this.stages[name];
     }
 
-    updateMousePos(newPos: Coordinates) {
+    updateMousePos(screenSize: {width: number, height: number}, newPos: Coordinates) {
+        newPos.x = Math.floor((this.width /screenSize.width) * newPos.x);
+        newPos.y = Math.floor((this.height/ screenSize.height) * newPos.y);
         this.mousePos = newPos;
     }
 
