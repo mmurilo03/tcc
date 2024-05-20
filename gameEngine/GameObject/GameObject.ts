@@ -23,7 +23,7 @@ export class GameObject
     context: CanvasRenderingContext2D;
     x: number;
     y: number;
-    precision: number = 2.5
+    precision: number = 2.5;
     // GameObjectInterface
     imagePath: string;
     width: number;
@@ -81,21 +81,35 @@ export class GameObject
         this.animationImagePosition = []; // animation frame count per line on image
         const img = new Image();
         this.imageElement = img;
-
-        img.src = `./gameEngine/GameImages/${this.imagePath}`;
-        img.onload = () => {
-            this.imageElement = img;
+        this.loadImage().then(() => {
             this.loadFromExport();
-        };
+        });
+    }
+
+    loadImage() {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = `./gameEngine/GameImages/${this.imagePath}`;
+            img.onload = () => {
+                this.imageElement = img;
+                resolve("done");
+            };
+            img.onerror = (error) => {
+                reject(error);
+            };
+        });
     }
 
     loadFromExport() {
-        this.hitboxCount = exports[this.imagePath as keyof typeof exports]?.hitboxCount;
-        this.hitboxes = exports[this.imagePath as keyof typeof exports]?.hitboxes;
-        this.animationImagePosition = exports[this.imagePath as keyof typeof exports]?.animationImagePosition;
-
-        if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
-            this.loading = false;
+        while (this.loading) {
+            this.hitboxCount = exports[this.imagePath as keyof typeof exports].hitboxCount;
+            this.hitboxes = exports[this.imagePath as keyof typeof exports].hitboxes;
+            this.animationImagePosition =
+                exports[this.imagePath as keyof typeof exports].animationImagePosition;
+            if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
+                this.loading = false;
+                break;
+            }
         }
     }
 
@@ -110,6 +124,13 @@ export class GameObject
     updateOutline() {
         // For each animation frame, get every outline and draw it
         this.outline = `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
+        if (this.loading) {
+            this.loadFromExport();
+            if (this.highlighted) {
+                this.highlightObject();
+            }
+            return;
+        }
         for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
             let currentOutline = this.hitboxes[this.activeFrame][outline];
             this.outline += currentOutline[0] + `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
@@ -134,8 +155,8 @@ export class GameObject
     }
 
     highlightObject() {
-        this.updateOutline();
         this.highlighted = true;
+        this.updateOutline();
     }
 
     unhighlightObject() {
@@ -154,6 +175,10 @@ export class GameObject
     draw() {
         if (this.flip) {
             this.context.scale(-1, 1);
+        }
+        if (this.loading) {
+            this.loadFromExport();
+            return;
         }
         this.context.drawImage(
             this.imageElement,
