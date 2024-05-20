@@ -41,6 +41,7 @@ export class GameObject
     highlighted: boolean = false;
     outline: string = "";
     outlineColor: string = "red";
+    fillColor: string = "black";
     outlineWidth: number = 1;
     // Array with frames
     // Array with each outline of a frame
@@ -192,7 +193,7 @@ export class GameObject
             this.height
         );
         if (this.highlighted) {
-            this.context.fillStyle = this.outlineColor;
+            this.context.fillStyle = this.fillColor;
             this.context.strokeStyle = this.outlineColor;
             this.context.lineWidth = this.outlineWidth;
             const path = new Path2D(this.outline);
