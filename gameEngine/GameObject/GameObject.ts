@@ -4,7 +4,6 @@ import {
     GameObjectInterface,
     GameObjectHiddenProperties,
     GameObjectProperties,
-    GameObjectDraw,
     ObjectProps,
 } from "../Interfaces/GameObjectInterfaces";
 import { exports } from "../exports.json";
@@ -13,7 +12,6 @@ import { Game } from "../Game";
 export class GameObject
     implements
         ObjectProps,
-        GameObjectDraw,
         GameObjectInterface,
         GameObjectProperties,
         GameObjectHiddenProperties
