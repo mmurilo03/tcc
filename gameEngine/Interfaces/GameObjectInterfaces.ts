@@ -22,6 +22,7 @@ export interface GameObjectInterface {
 
 export interface GameObjectHiddenProperties {
     imageElement: HTMLImageElement;
+    loading: boolean;
     hitboxCount: number;
     activeFrame: number;
     frameCounter: number;
@@ -31,6 +32,10 @@ export interface GameObjectHiddenProperties {
     clicked: boolean;
     highlighted: boolean;
     outline: string;
+    outlineColor: string;
+    fillColor: string;
+    outlineWidth: number;
+    name?: string;
 }
 
 export interface AnimationFrame {

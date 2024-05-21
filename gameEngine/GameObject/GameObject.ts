@@ -10,11 +10,7 @@ import { exports } from "../exports.json";
 import { Game } from "../Game";
 
 export class GameObject
-    implements
-        ObjectProps,
-        GameObjectInterface,
-        GameObjectProperties,
-        GameObjectHiddenProperties
+    implements ObjectProps, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
 {
     // ObjectProps
     game: Game;
@@ -41,6 +37,7 @@ export class GameObject
     outlineColor: string = "red";
     fillColor: string = "black";
     outlineWidth: number = 1;
+    name: string = "";
     // Array with frames
     // Array with each outline of a frame
     // Array of points
