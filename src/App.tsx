@@ -10,41 +10,42 @@ const buildImage = async (obj: GameObject) => {
         imagePath: obj.imagePath,
         height: obj.height,
         width: obj.width,
-        precision: obj.precision
+        precision: obj.precision,
     });
     for (let otherObj of obj.otherObjects) {
         await buildImage(otherObj);
     }
-}
+};
 
 const loadGame = async () => {
     for (let obj of game.globalObjects.stageObjects) {
-        await buildImage(obj)
+        await buildImage(obj);
     }
 
     for (let stage in game.stages) {
         let currentStage = game.stages[stage];
         for (let obj of currentStage.stageObjects) {
-            await buildImage(obj)
+            await buildImage(obj);
         }
-    }    
+    }
     return false;
 };
 
 function App() {
     const canvasRef = useRef<HTMLDivElement>(null);
+    const { current: gameState } = useRef(game);
 
     const [loading, setLoading] = useState(true);
     const called = useRef(false);
 
     const handleKeyDown = (event: KeyboardEvent) => {
         event.preventDefault();
-        game.addInput(event.key.toLowerCase());
+        gameState.addInput(event.key.toLowerCase());
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
         event.preventDefault();
-        game.removeInput(event.key.toLowerCase());
+        gameState.removeInput(event.key.toLowerCase());
     };
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -52,21 +53,24 @@ function App() {
         if (canvasRef.current) {
             const offset = canvasRef.current.getBoundingClientRect();
 
-            game.updateMousePos({width: offset.width, height: offset.height},{ x: event.clientX - offset.left, y: event.clientY - offset.top });
+            gameState.updateMousePos(
+                { width: offset.width, height: offset.height },
+                { x: event.clientX - offset.left, y: event.clientY - offset.top }
+            );
         }
     };
 
     const handleMouseDown = () => {
-        game.mouseDown();
+        gameState.mouseDown();
     };
 
     const handleMouseUp = () => {
-        game.mouseUp();
+        gameState.mouseUp();
     };
 
     useEffect(() => {
         if (!canvasRef.current) return;
-        canvasRef.current.replaceChildren(game.canvas);
+        canvasRef.current.replaceChildren(gameState.canvas);
 
         document.addEventListener("keydown", handleKeyDown);
         document.addEventListener("keyup", handleKeyUp);
@@ -78,8 +82,8 @@ function App() {
     });
 
     useEffect(() => {
-        if(!called.current) {
-            loadGame().then(res => setLoading(res));
+        if (!called.current) {
+            loadGame().then((res) => setLoading(res));
             called.current = true;
         }
     }, []);
