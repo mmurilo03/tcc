@@ -10,6 +10,10 @@ interface AllText {
     [propName: string]: Text;
 }
 
+interface AllAudio {
+    [propName: string]: HTMLAudioElement;
+}
+
 interface Text {
     fontSize: string;
     fontStyle?: FontFace;
@@ -35,6 +39,7 @@ export class Game {
     mouseClick: boolean = false;
 
     allText: AllText = {};
+    allAudio: AllAudio = {};
 
     constructor({ width, height }: Dimensions) {
         this.width = width;
@@ -72,7 +77,7 @@ export class Game {
 
             this.context.font = font;
             this.context.fillStyle = text.textColor ? text.textColor : "black";
-            this.context.fillText(text.text, text.textPositionX, text.textPositionY);            
+            this.context.fillText(text.text, text.textPositionX, text.textPositionY);
             if (text.textOutlineColor && text.textOutlineWidth) {
                 this.context.lineWidth = text.textOutlineWidth;
                 this.context.strokeStyle = text.textOutlineColor;
@@ -124,5 +129,50 @@ export class Game {
         for (let key of Object.keys(this.allText)) {
             delete this.allText[key];
         }
+    }
+
+    startAudio(audioPath: string, speed?: number) {
+        let checkedAudio = this.allAudio[audioPath];
+        if (checkedAudio && (checkedAudio.currentTime >= checkedAudio.duration || checkedAudio.paused)) {
+            checkedAudio.play();
+            return;
+        } else if (checkedAudio && !checkedAudio.paused) {
+            console.log(`Sound: ${audioPath} already playing`);
+            return;
+        }
+        let audio: HTMLAudioElement;
+        audio = new Audio(`./gameEngine/GameSounds/${audioPath}`);
+        if (speed && speed >= 0.1 && speed <= 16) {
+            audio.playbackRate = speed;
+        }
+        this.allAudio[audioPath] = audio;
+        audio.play().catch(() => {
+            delete this.allAudio[audioPath];
+            console.log(`File: ${audioPath} not in GameSounds`);
+        });
+    }
+
+    playAudio(audioPath: string, speed?: number) {
+        let audio = new Audio(`./gameEngine/GameSounds/${audioPath}`);
+        if (speed && speed >= 0.1 && speed <= 16) {
+            audio.playbackRate = speed;
+        }
+        audio.play().catch(() => {
+            console.log(`File: ${audioPath} not in GameSounds`)
+        });
+    }
+
+    pauseAudio(audioPath: string) {
+        if (!this.allAudio[audioPath]) return;
+        this.allAudio[audioPath].pause();
+    }
+
+    deleteAudio(audioPath: string) {
+        if (!this.allAudio[audioPath]) return;
+        delete this.allAudio[audioPath];
+    }
+
+    getAudio(audioPath: string) {
+        if (this.allAudio[audioPath]) return this.allAudio[audioPath];
     }
 }
