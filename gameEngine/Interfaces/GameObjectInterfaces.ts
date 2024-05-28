@@ -16,6 +16,12 @@ export interface ObjectProps {
     clickable: boolean;
 }
 
+export interface ObjectPropsSimple {
+    game: Game;
+    x: number;
+    y: number;
+}
+
 export interface GameObjectHiddenProperties {
     imageElement: HTMLImageElement;
     loading: boolean;

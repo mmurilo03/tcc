@@ -1,12 +1,11 @@
 import { GameObjectDynamic } from "../GameObject/GameObjectDynamic";
-import { Game } from "../Game";
-import { ObjectProps } from "../Interfaces/GameObjectInterfaces";
+import { ObjectPropsSimple } from "../Interfaces/GameObjectInterfaces";
 
 export class Wolf extends GameObjectDynamic {
     static imagePath: string = "playerTestImage.png";
     static height: number = 100;
     static width: number = 100;
-    constructor({ game, x, y }: ObjectProps) {
+    constructor({ game, x, y }: ObjectPropsSimple) {
         super(
             {
                 game,
