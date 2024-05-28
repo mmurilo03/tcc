@@ -1,21 +1,26 @@
-import { Game } from "../main";
+import { Game } from "../Game";
 
 export interface Coordinates {
     x: number;
     y: number;
 }
 
-export interface GameObjectInterface {
-    game?: Game
+export interface ObjectProps {
+    game: Game;
     context: CanvasRenderingContext2D;
-    imagePath: string;
     x: number;
     y: number;
-    width: number;
-    height: number;
+    precision?: number;
 }
 
-export interface GameObjectProperties {
+export interface GameObjectInterface {
+    imagePath: string;
+    width: number;
+    height: number;
+    clickable: boolean;
+}
+
+export interface GameObjectHiddenProperties {
     imageElement: HTMLImageElement;
     loading: boolean;
     hitboxCount: number;
@@ -23,5 +28,22 @@ export interface GameObjectProperties {
     frameCounter: number;
     flip: boolean;
     hitboxes: Array<Array<Array<string>>>;
-    animationFrame?: Array<Coordinates>;
+    animationImagePosition: Array<Coordinates>;
+    clicked: boolean;
+    highlighted: boolean;
+    outline: string;
+    outlineColor: string;
+    fillColor: string;
+    outlineWidth: number;
+    name?: string;
+}
+
+export interface AnimationFrame {
+    [propName: string]: { start: number; end: number; duration: number };
+}
+
+export interface GameObjectProperties {
+    state: string;
+    animationFrames: AnimationFrame;
+    previousState?: string;
 }
