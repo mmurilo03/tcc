@@ -1,29 +1,19 @@
-import {
-    AnimationFrame,
-    Coordinates,
-    GameObjectInterface,
-    GameObjectHiddenProperties,
-    GameObjectProperties,
-    ObjectProps,
-} from "../Interfaces/GameObjectInterfaces";
+import { Coordinates, GameObjectHiddenProperties, ObjectProps } from "../Interfaces/GameObjectInterfaces";
 import { exports } from "../exports.json";
 import { Game } from "../Game";
 
-export class GameObject
-    implements ObjectProps, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
-{
+export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     // ObjectProps
     game: Game;
-    context: CanvasRenderingContext2D;
     x: number;
     y: number;
     precision: number = 2.5;
-    // GameObjectInterface
     imagePath: string;
     width: number;
     height: number;
     clickable: boolean = false;
 
+    context: CanvasRenderingContext2D;
     // GameObjectHiddenProperties
     imageElement: HTMLImageElement;
     loading: boolean = true;
@@ -44,30 +34,19 @@ export class GameObject
     hitboxes: string[][][];
     animationImagePosition: Coordinates[];
 
-    // GameObjectProperties
-    state: string;
-    animationFrames: AnimationFrame;
-    previousState: string;
     otherObjects: GameObject[] = [];
 
-    constructor(
-        objectProps: ObjectProps,
-        gameObjectInterface: GameObjectInterface,
-        gameObjectProperties: GameObjectProperties
-    ) {
+    constructor(objectProps: ObjectProps) {
         this.game = objectProps.game;
-        this.context = objectProps.context;
         this.x = objectProps.x;
         this.y = objectProps.y;
         this.precision = objectProps.precision ? objectProps.precision : 2.5;
-        this.imagePath = gameObjectInterface.imagePath;
-        this.width = gameObjectInterface.width;
-        this.height = gameObjectInterface.height;
-        this.clickable = gameObjectInterface.clickable;
+        this.imagePath = objectProps.imagePath;
+        this.width = objectProps.width;
+        this.height = objectProps.height;
+        this.clickable = objectProps.clickable;
 
-        this.state = gameObjectProperties.state;
-        this.previousState = gameObjectProperties.state;
-        this.animationFrames = gameObjectProperties.animationFrames;
+        this.context = this.game.context;
 
         this.hitboxCount = 0;
         this.activeFrame = 0;

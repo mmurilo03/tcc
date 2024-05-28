@@ -6,16 +6,16 @@ export class Wolf extends GameObjectDynamic {
     static imagePath: string = "playerTestImage.png";
     static height: number = 100;
     static width: number = 100;
-    constructor({ game, context, x, y }: ObjectProps) {
+    constructor({ game, x, y }: ObjectProps) {
         super(
             {
-                game, context, x, y
-            },
-            {
+                game,
+                x,
+                y,
+                clickable: true,
                 height: Wolf.height,
                 width: Wolf.width,
                 imagePath: Wolf.imagePath,
-                clickable: true
             },
             {
                 state: "idle",
