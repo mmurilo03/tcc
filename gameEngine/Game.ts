@@ -31,6 +31,8 @@ export class Game {
     height: number;
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
+    extraCanvas: HTMLCanvasElement;
+    extraContext: CanvasRenderingContext2D;
     inputs: string[] = [];
     stages: Stages = {};
     activeStage?: Stage;
@@ -49,6 +51,10 @@ export class Game {
         this.canvas.width = width;
         this.canvas.height = height;
         this.context = this.canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
+        this.extraCanvas = document.createElement("canvas");
+        this.extraCanvas.width = width;
+        this.extraCanvas.height = height;
+        this.extraContext = this.extraCanvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
     }
 
     addInput(key: string) {

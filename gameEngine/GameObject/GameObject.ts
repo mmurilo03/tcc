@@ -16,6 +16,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     context: CanvasRenderingContext2D;
     // GameObjectHiddenProperties
     imageElement: HTMLImageElement;
+    flippedImageElement: HTMLImageElement;
     loading: boolean = true;
     hitboxCount: number;
     activeFrame: number;
@@ -51,11 +52,11 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         this.hitboxCount = 0;
         this.activeFrame = 0;
         this.frameCounter = 0;
-        // this.flip = false;
         this.hitboxes = []; // points of the hitbox
         this.animationImagePosition = []; // animation frame count per line on image
         const img = new Image();
         this.imageElement = img;
+        this.flippedImageElement = img;
         this.loadImage().then(() => {
             this.loadFromExport();
         });
@@ -67,6 +68,15 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
             img.src = `./gameEngine/GameImages/${this.imagePath}`;
             img.onload = () => {
                 this.imageElement = img;
+                this.game.extraCanvas.width = this.imageElement.naturalWidth
+                this.game.extraCanvas.height = this.imageElement.naturalHeight
+                this.game.extraContext.save();
+                this.game.extraContext.translate(this.game.extraCanvas.width, 0);
+                this.game.extraContext.scale(-1, 1);
+                this.game.extraContext.drawImage(this.imageElement, 0, 0);
+                this.flippedImageElement.src = this.game.extraCanvas.toDataURL();
+                this.game.extraContext.clearRect(0, 0, this.game.width, this.game.height);
+                this.game.extraContext.restore();
                 resolve("done");
             };
             img.onerror = (error) => {
@@ -148,33 +158,41 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     }
 
     draw() {
-        if (this.flip) {
-            this.context.scale(-1, 1);
-        }
         if (this.loading) {
             this.loadFromExport();
             return;
         }
-        this.context.drawImage(
-            this.imageElement,
-            this.animationImagePosition[this.activeFrame].x,
-            this.animationImagePosition[this.activeFrame].y,
-            this.width,
-            this.height,
-            this.flip ? -this.x - this.width : this.x,
-            this.y,
-            this.width,
-            this.height
-        );
+        if (this.flip) {
+            this.context.drawImage(
+                this.flippedImageElement,
+                this.imageElement.naturalWidth - this.width - this.animationImagePosition[this.activeFrame].x,
+                this.animationImagePosition[this.activeFrame].y,
+                this.width,
+                this.height,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+        } else {
+            this.context.drawImage(
+                this.imageElement,
+                this.animationImagePosition[this.activeFrame].x,
+                this.animationImagePosition[this.activeFrame].y,
+                this.width,
+                this.height,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+        }
         if (this.highlighted) {
             this.context.fillStyle = this.fillColor;
             this.context.strokeStyle = this.outlineColor;
             this.context.lineWidth = this.outlineWidth;
             const path = new Path2D(this.outline);
             this.context.stroke(path);
-        }
-        if (this.flip) {
-            this.context.scale(-1, 1);
         }
     }
 }
