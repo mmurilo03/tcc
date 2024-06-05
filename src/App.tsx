@@ -15,6 +15,8 @@ const buildImage = async (obj: GameObject) => {
     for (let otherObj of obj.otherObjects) {
         await buildImage(otherObj);
     }
+    await obj.loadImage();
+    console.log(obj.imagePath);
 };
 
 const loadGame = async () => {

@@ -1,6 +1,6 @@
 import { Coordinates, GameObjectHiddenProperties, ObjectProps } from "../Interfaces/GameObjectInterfaces";
-import { exports } from "../exports.json";
 import { Game } from "../Game";
+import { ExportedObject } from "./HitboxMaker";
 
 export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     // ObjectProps
@@ -41,7 +41,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         this.game = objectProps.game;
         this.x = objectProps.x;
         this.y = objectProps.y;
-        this.precision = objectProps.precision ? objectProps.precision : 2.5;
+        this.precision = objectProps.precision ? objectProps.precision : 10;
         this.imagePath = objectProps.imagePath;
         this.width = objectProps.width;
         this.height = objectProps.height;
@@ -57,19 +57,16 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         const img = new Image();
         this.imageElement = img;
         this.flippedImageElement = img;
-        this.loadImage().then(() => {
-            this.loadFromExport();
-        });
     }
 
-    loadImage() {
-        return new Promise((resolve, reject) => {
+    async loadImage() {
+        await new Promise((resolve, reject) => {
             const img = new Image();
             img.src = `./gameEngine/GameImages/${this.imagePath}`;
             img.onload = () => {
                 this.imageElement = img;
-                this.game.extraCanvas.width = this.imageElement.naturalWidth
-                this.game.extraCanvas.height = this.imageElement.naturalHeight
+                this.game.extraCanvas.width = this.imageElement.naturalWidth;
+                this.game.extraCanvas.height = this.imageElement.naturalHeight;
                 this.game.extraContext.save();
                 this.game.extraContext.translate(this.game.extraCanvas.width, 0);
                 this.game.extraContext.scale(-1, 1);
@@ -83,18 +80,19 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
                 reject(error);
             };
         });
+        await this.loadFromExport();
     }
 
-    loadFromExport() {
-        while (this.loading) {
-            this.hitboxCount = exports[this.imagePath as keyof typeof exports].hitboxCount;
-            this.hitboxes = exports[this.imagePath as keyof typeof exports].hitboxes;
-            this.animationImagePosition =
-                exports[this.imagePath as keyof typeof exports].animationImagePosition;
-            if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
-                this.loading = false;
-                break;
-            }
+    async loadFromExport() {
+        let ex = await fetch(new URL("../exports.json", import.meta.url));
+        let json = await ex.json();
+        let exportedObject: ExportedObject = json.exports[this.imagePath];
+
+        this.hitboxCount = exportedObject.hitboxCount;
+        this.hitboxes = exportedObject.hitboxes;
+        this.animationImagePosition = exportedObject.animationImagePosition;
+        if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
+            this.loading = false;
         }
     }
 

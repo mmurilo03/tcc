@@ -5,7 +5,6 @@ import {
     HitboxMakerProperties,
 } from "../Interfaces/HitboxMakerInterfaces";
 import paper from "paper";
-import { exports } from "../exports.json";
 import { api } from "../axios";
 
 interface DirectionPixels {
@@ -20,6 +19,13 @@ interface DirectionCoords {
     upCoord: Coordinates;
     rightCoord: Coordinates;
     downCoord: Coordinates;
+}
+
+
+export interface ExportedObject {
+    hitboxCount: number;
+    hitboxes: string[][][];
+    animationImagePosition: Coordinates[];
 }
 
 export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties {
@@ -60,11 +66,17 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         const img = new Image();
         this.imageElement = img;
 
+        let ex = await fetch(new URL("../exports.json", import.meta.url));
+        let json = await ex.json();
+
+        if (Object.keys(json.exports).includes(this.imagePath)) {
+            return;
+        }
         await new Promise((resolve, reject) => {
             img.src = `./gameEngine/GameImages/${this.imagePath}`;
             img.onload = async () => {
                 this.imageElement = img;
-                if (!Object.keys(exports).includes(this.imagePath)) {
+                if (!Object.keys(json.exports).includes(this.imagePath)) {
                     this.countHitboxes();
                     await this.loadHitBox();
                 }
@@ -137,7 +149,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
                 break;
             }
         }
-        console.log("HITBOX COUNT: ", this.hitboxCount);
+        // console.log("HITBOX COUNT: ", this.hitboxCount);        
     }
 
     async loadHitBox() {
@@ -294,14 +306,14 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             animationImagePosition: this.animationImagePosition,
         };
 
-        this.finalHitbox.hitboxes.forEach(async (hitbox) => {
+        for (let hitbox of this.finalHitbox.hitboxes) {
             await api.post("/objects", {
                 imagePath: this.imagePath,
                 hitboxCount: this.finalHitbox.hitboxCount,
                 hitbox: hitbox,
                 animationImagePosition: this.finalHitbox.animationImagePosition,
             });
-        });
+        }
     }
 
     drawOutline(

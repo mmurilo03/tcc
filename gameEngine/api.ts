@@ -1,20 +1,22 @@
 import express from "express";
 import fs from "fs";
 import cors from "cors";
-import { exports } from "./exports.json";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-app.get("/objects", async (req, res) => {
-    res.json(exports);
-});
-
 app.post("/objects", (req, res) => {
-    let jsonBefore = exports;
-    let hitboxBefore = exports[`${req.body.imagePath}`];
+    let jsonBefore = JSON.parse(fs.readFileSync("./gameEngine/exports.json", "utf-8")).exports;
+    if (
+        jsonBefore[`${req.body.imagePath}`] &&
+        jsonBefore[`${req.body.imagePath}`].hitboxCount == jsonBefore[`${req.body.imagePath}`].hitboxes.length
+    ) {
+        res.status(200).send("ok");
+        return;
+    }
+    let hitboxBefore = jsonBefore[`${req.body.imagePath}`];
 
     if (hitboxBefore?.hitboxes && hitboxBefore.hitboxes.length > 0) {
         hitboxBefore = {
@@ -31,8 +33,9 @@ app.post("/objects", (req, res) => {
     }
     jsonBefore[`${req.body.imagePath}`] = hitboxBefore;
 
-    fs.writeFileSync("./gameEngine/exports.json", JSON.stringify({ exports: jsonBefore }));
+    fs.writeFileSync("./gameEngine/exports.json", JSON.stringify({ exports: jsonBefore }, null, 4));
     res.status(200).send("ok");
+    return;
 });
 
 const server = app.listen(3000, () => {
