@@ -1,6 +1,7 @@
 import { Dimensions } from "./Interfaces/Dimensions.ts";
 import { Stage } from "./GameStages/Stage.ts";
 import { Coordinates } from "./Interfaces/GameObjectInterfaces.ts";
+import paper from "paper";
 
 interface Stages {
     [propName: string]: Stage;
@@ -46,6 +47,7 @@ export class Game {
     constructor({ width, height }: Dimensions) {
         this.width = width;
         this.height = height;
+        paper.setup(new paper.Size(1, 1));
 
         this.canvas = document.createElement("canvas");
         this.canvas.width = width;

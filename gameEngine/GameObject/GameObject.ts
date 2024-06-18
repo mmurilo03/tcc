@@ -1,6 +1,7 @@
 import { Coordinates, GameObjectHiddenProperties, ObjectProps } from "../Interfaces/GameObjectInterfaces";
 import { Game } from "../Game";
 import { ExportedObject } from "./HitboxMaker";
+import paper from "paper";
 
 export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     // ObjectProps
@@ -153,6 +154,22 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
             point.y > this.y &&
             point.y < this.y + this.height
         );
+    }
+
+    checkCollision(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        otherObject.updateOutline();
+        let otherObjectOutline = otherObject.outline;
+
+        let path = new paper.Path(otherObjectOutline);
+        this.updateOutline();
+        let svgPath = new paper.Path(this.outline);
+
+        let collision = path.intersects(svgPath) ? true : false;
+        paper.project.clear();
+        return collision;
     }
 
     draw() {
