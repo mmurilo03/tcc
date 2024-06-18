@@ -3,6 +3,7 @@ import { Game } from "../Game";
 
 export class Stage {
     stageObjects: GameObject[] = [];
+    numberOfObjects: number = 0;
     game: Game;
     name: string;
 
@@ -12,7 +13,7 @@ export class Stage {
     }
 
     update() {
-        for (let i = this.stageObjects.length-1; i >= 0; i--) {
+        for (let i = this.stageObjects.length - 1; i >= 0; i--) {
             if (!this.stageObjects[i].loading) {
                 this.stageObjects[i].update();
                 this.stageObjects[i].draw();
@@ -22,6 +23,8 @@ export class Stage {
 
     add(obj: GameObject) {
         this.stageObjects.push(obj);
+        this.numberOfObjects++;
+        this.numberOfObjects += obj.otherObjects.length;
     }
 
     remove(obj: GameObject) {
