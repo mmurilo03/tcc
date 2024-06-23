@@ -30,6 +30,8 @@ interface Text {
 export class Game {
     width: number;
     height: number;
+    horizontalOffset: number = 0;
+    verticalOffset: number = 0;
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
     extraCanvas: HTMLCanvasElement;
@@ -56,7 +58,9 @@ export class Game {
         this.extraCanvas = document.createElement("canvas");
         this.extraCanvas.width = width;
         this.extraCanvas.height = height;
-        this.extraContext = this.extraCanvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
+        this.extraContext = this.extraCanvas.getContext("2d", {
+            willReadFrequently: true,
+        }) as CanvasRenderingContext2D;
     }
 
     addInput(key: string) {
@@ -69,7 +73,14 @@ export class Game {
         this.inputs.splice(this.inputs.indexOf(key), 1);
     }
 
+    moveCamera(horizontal: number, vertical: number) {
+        this.context.translate(horizontal, vertical);
+        this.horizontalOffset += horizontal;
+        this.verticalOffset += vertical;
+    }
+
     update() {
+        this.context.clearRect(-this.horizontalOffset, -this.verticalOffset, this.width, this.height);
         this.globalObjects.update();
         if (this.activeStage) {
             this.activeStage.update();
@@ -166,7 +177,7 @@ export class Game {
             audio.playbackRate = speed;
         }
         audio.play().catch(() => {
-            console.log(`File: ${audioPath} not in GameSounds`)
+            console.log(`File: ${audioPath} not in GameSounds`);
         });
     }
 
