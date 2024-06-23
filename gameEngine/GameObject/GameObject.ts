@@ -119,6 +119,11 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
             let currentOutline = this.hitboxes[this.activeFrame][outline];
             this.outline += currentOutline[0] + `M${this.x} ${this.y}`;
         }
+        if (this.flip) {
+            let path = new paper.Path(this.outline);
+            path.scale(-1, 1);
+            this.outline = path.pathData;
+        }
     }
 
     getOutline() {
