@@ -107,7 +107,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
 
     updateOutline() {
         // For each animation frame, get every outline and draw it
-        this.outline = `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
+        this.outline = `M${this.x} ${this.y}`;
         if (this.loading) {
             this.loadFromExport();
             if (this.highlighted) {
@@ -117,7 +117,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         }
         for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
             let currentOutline = this.hitboxes[this.activeFrame][outline];
-            this.outline += currentOutline[0] + `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
+            this.outline += currentOutline[0] + `M${this.x} ${this.y}`;
         }
     }
 
@@ -160,6 +160,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
+        if (!this.checkLeftRight(otherObject) && !this.checkUpDown(otherObject)) return false;
         otherObject.updateOutline();
         let otherObjectOutline = otherObject.outline;
 
@@ -170,6 +171,30 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         let collision = path.intersects(svgPath) ? true : false;
         paper.project.clear();
         return collision;
+    }
+
+    checkLeftRight(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisWidthPlusX = this.x + this.width;
+        let otherWidthPlusX = otherObject.x + otherObject.width;
+        if (thisWidthPlusX > otherObject.x && this.x < otherWidthPlusX) {
+            return true;
+        }
+        return false;
+    }
+
+    checkUpDown(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisHeightPlusY = this.y + this.height;
+        let otherHeightPlusY = otherObject.y + otherObject.height;
+        if (thisHeightPlusY > otherObject.y && this.y < otherHeightPlusY) {
+            return true;
+        }
+        return false;
     }
 
     draw() {
