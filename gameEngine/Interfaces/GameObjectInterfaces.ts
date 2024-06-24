@@ -38,6 +38,7 @@ export interface GameObjectHiddenProperties {
     fillColor: string;
     outlineWidth: number;
     name?: string;
+    flippedImageElement: HTMLImageElement;
 }
 
 export interface AnimationFrame {

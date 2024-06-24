@@ -103,6 +103,7 @@ export class Game {
                 this.context.strokeText(text.text, text.textPositionX, text.textPositionY);
             }
         }
+        paper.project.clear();
     }
 
     addStage(stage: Stage) {

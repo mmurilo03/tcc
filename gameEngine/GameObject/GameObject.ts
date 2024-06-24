@@ -17,12 +17,16 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     context: CanvasRenderingContext2D;
     // GameObjectHiddenProperties
     imageElement: HTMLImageElement;
-    flippedImageElement: HTMLImageElement;
     loading: boolean = true;
     hitboxCount: number;
     activeFrame: number;
     frameCounter: number;
     flip: boolean = false;
+    // Array with frames
+    // Array with each outline of a frame
+    // Array of points
+    hitboxes: string[][][];
+    animationImagePosition: Coordinates[];
     clicked: boolean = false;
     highlighted: boolean = false;
     outline: string = "";
@@ -30,11 +34,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     fillColor: string = "black";
     outlineWidth: number = 1;
     name: string = "";
-    // Array with frames
-    // Array with each outline of a frame
-    // Array of points
-    hitboxes: string[][][];
-    animationImagePosition: Coordinates[];
+    flippedImageElement: HTMLImageElement;
 
     otherObjects: GameObject[] = [];
 
@@ -121,7 +121,11 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         }
         if (this.flip) {
             let path = new paper.Path(this.outline);
+            let pathX = path.position.x - path.bounds.width / 2;
+            let ajustment = this.x - pathX;
+            let translate = this.x + this.width - (pathX + path.bounds.width) + ajustment;
             path.scale(-1, 1);
+            path.translate([translate, 0]);
             this.outline = path.pathData;
         }
     }
@@ -174,7 +178,6 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         let svgPath = new paper.Path(this.outline);
 
         let collision = path.intersects(svgPath) ? true : false;
-        paper.project.clear();
         return collision;
     }
 
