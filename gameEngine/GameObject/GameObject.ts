@@ -175,9 +175,25 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
 
         let path = new paper.Path(otherObjectOutline);
         this.updateOutline();
-        let svgPath = new paper.Path(this.outline);
+        let thisObjectPath = new paper.Path(this.outline);
 
-        let collision = path.intersects(svgPath) ? true : false;
+        let collision = path.intersects(thisObjectPath) ? true : false;
+        return collision;
+    }
+
+    checkIfWillCollide(otherObject: GameObject, horizontalDistance: number, verticalDistance: number) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        otherObject.updateOutline();
+        let otherObjectOutline = otherObject.outline;
+
+        let path = new paper.Path(otherObjectOutline);
+        this.updateOutline();
+        let thisObjectPath = new paper.Path(this.outline);
+        thisObjectPath.translate([horizontalDistance, verticalDistance])
+
+        let collision = path.intersects(thisObjectPath) ? true : false;
         return collision;
     }
 
