@@ -5,6 +5,7 @@ export class Wolf extends GameObjectDynamic {
     static imagePath: string = "playerTestImage.png";
     static height: number = 100;
     static width: number = 100;
+    speed: number = 5;
     constructor({ game, x, y }: ObjectPropsSimple) {
         super(
             {
@@ -43,16 +44,36 @@ export class Wolf extends GameObjectDynamic {
             this.game?.inputs.includes("a") &&
             this.game.inputs.indexOf("a") > this.game.inputs.indexOf("d")
         ) {
-            this.x -= 1;
+            this.x -= this.speed;
+            this.game.moveCamera(this.speed, 0);
             this.state = "running";
             this.flip = true;
         } else if (
             this.game?.inputs.includes("d") &&
             this.game.inputs.indexOf("d") > this.game.inputs.indexOf("a")
         ) {
-            this.x += 1;
+            this.x += this.speed;
+            this.game.moveCamera(-this.speed, 0);
             this.state = "running";
             this.flip = false;
         }
+        if (
+            this.game?.inputs.includes("w") &&
+            this.game.inputs.indexOf("w") > this.game.inputs.indexOf("s")
+        ) {
+            this.y -= this.speed;
+            this.game.moveCamera(0, this.speed);
+            this.state = "running";
+            this.flip = true;
+        } else if (
+            this.game?.inputs.includes("s") &&
+            this.game.inputs.indexOf("s") > this.game.inputs.indexOf("w")
+        ) {
+            this.y += this.speed;
+            this.game.moveCamera(0, -this.speed);
+            this.state = "running";
+            this.flip = true;
+        }
+        this.highlightObject();
     }
 }

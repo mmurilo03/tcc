@@ -191,16 +191,67 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         let path = new paper.Path(otherObjectOutline);
         this.updateOutline();
         let thisObjectPath = new paper.Path(this.outline);
-        thisObjectPath.translate([horizontalDistance, verticalDistance])
+        thisObjectPath.translate([horizontalDistance, verticalDistance]);
 
         let collision = path.intersects(thisObjectPath) ? true : false;
         return collision;
+    }
+
+    checkDistance(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        otherObject.updateOutline();
+        this.updateOutline();
+
+        let distance = { x: 0, y: 0 };
+
+        if (this.checkObjectIsToTheRight(otherObject)) {
+            distance.x = otherObject.x - (this.x + this.width);
+        } else {
+            let dist = this.x - (otherObject.x + otherObject.width)
+            distance.x = dist <= 0 ? 0 : dist
+        }
+
+        if (this.checkObjectIsBelow(otherObject)) {
+            distance.y = otherObject.y - (this.y + this.height);
+        } else {
+            let dist = this.y - (otherObject.y + otherObject.height)
+            distance.y = dist <= 0 ? 0 : dist
+        }
+
+        return distance;
+    }
+
+    checkObjectIsToTheRight(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        this.updateOutline();
+        let thisWidthPlusX = this.x + this.width;
+        if (thisWidthPlusX < otherObject.x) {
+            return true;
+        }
+        return false;
+    }
+
+    checkObjectIsBelow(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        this.updateOutline();
+        let thisHeightPlusY = this.y + this.height;
+        if (thisHeightPlusY < otherObject.y) {
+            return true;
+        }
+        return false;
     }
 
     checkLeftRight(otherObject: GameObject) {
         if (this.loading || otherObject.loading) {
             return false;
         }
+        this.updateOutline();
         let thisWidthPlusX = this.x + this.width;
         let otherWidthPlusX = otherObject.x + otherObject.width;
         if (thisWidthPlusX > otherObject.x && this.x < otherWidthPlusX) {
@@ -213,6 +264,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
+        this.updateOutline();
         let thisHeightPlusY = this.y + this.height;
         let otherHeightPlusY = otherObject.y + otherObject.height;
         if (thisHeightPlusY > otherObject.y && this.y < otherHeightPlusY) {
