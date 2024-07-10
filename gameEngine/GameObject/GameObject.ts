@@ -135,6 +135,10 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         return this.outline;
     }
 
+    getPositionFromBorder() {
+        return { x: -this.game.pos.x + this.x, y: this.game.pos.y + this.y }
+    }
+
     detectClick() {
         if (this.isPointClose(this.game.mousePos)) {
             return this.detectCollision(this.game.mousePos);
