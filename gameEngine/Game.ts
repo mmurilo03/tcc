@@ -36,6 +36,7 @@ export class Game {
     context: CanvasRenderingContext2D;
     extraCanvas: HTMLCanvasElement;
     extraContext: CanvasRenderingContext2D;
+    pos: Coordinates = { x: 0, y: 0 };
     inputs: string[] = [];
     stages: Stages = {};
     activeStage?: Stage;
@@ -74,8 +75,10 @@ export class Game {
     }
 
     moveCamera(horizontal: number, vertical: number) {
-        this.context.translate(horizontal, vertical);
-        this.horizontalOffset += horizontal;
+        this.context.translate(-horizontal, vertical);
+        this.pos = { x: this.pos.x + horizontal, y: this.pos.y + vertical };
+        
+        this.horizontalOffset -= horizontal;
         this.verticalOffset += vertical;
     }
 
