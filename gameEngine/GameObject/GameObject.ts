@@ -173,7 +173,8 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
-        if (!this.checkLeftRight(otherObject) && !this.checkUpDown(otherObject)) return false;
+        if (!this.checkLeftRight(otherObject) || !this.checkUpDown(otherObject)) return false;
+        
         otherObject.updateOutline();
         let otherObjectOutline = otherObject.outline;
 
@@ -231,7 +232,6 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
-        this.updateOutline();
         let thisWidthPlusX = this.x + this.width;
         if (thisWidthPlusX < otherObject.x) {
             return true;
@@ -243,7 +243,6 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
-        this.updateOutline();
         let thisHeightPlusY = this.y + this.height;
         if (thisHeightPlusY < otherObject.y) {
             return true;
@@ -255,7 +254,6 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
-        this.updateOutline();
         let thisWidthPlusX = this.x + this.width;
         let otherWidthPlusX = otherObject.x + otherObject.width;
         if (thisWidthPlusX > otherObject.x && this.x < otherWidthPlusX) {
