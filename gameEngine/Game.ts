@@ -36,6 +36,14 @@ export class Game {
     context: CanvasRenderingContext2D;
     extraCanvas: HTMLCanvasElement;
     extraContext: CanvasRenderingContext2D;
+    hasBackground: boolean = false;
+    prevBackgroundImage: HTMLImageElement = new Image();
+    backgroundImage: HTMLImageElement = new Image();
+    scrollHeight: number;
+    scrollAmount: number = 1;
+    fadeIn: number = 0;
+    fadeOut: number = 2;
+    fadeSpeed: number = 0.005;
     pos: Coordinates = { x: 0, y: 0 };
     inputs: string[] = [];
     stages: Stages = {};
@@ -62,6 +70,7 @@ export class Game {
         this.extraContext = this.extraCanvas.getContext("2d", {
             willReadFrequently: true,
         }) as CanvasRenderingContext2D;
+        this.scrollHeight = 0;
     }
 
     addInput(key: string) {
@@ -76,14 +85,26 @@ export class Game {
 
     moveCamera(horizontal: number, vertical: number) {
         this.context.translate(-horizontal, vertical);
+        if (vertical > 0) {
+            this.scrollHeight -= this.scrollAmount;
+        } else if (vertical < 0) {
+            this.scrollHeight += this.scrollAmount;
+        }
         this.pos = { x: this.pos.x + horizontal, y: this.pos.y + vertical };
-        
+
         this.horizontalOffset -= horizontal;
         this.verticalOffset += vertical;
     }
 
     update() {
         this.context.clearRect(-this.horizontalOffset, -this.verticalOffset, this.width, this.height);
+        if (this.hasBackground) {
+            if (this.fadeOut > 0) {
+                this.drawBackgroundFadeOut();
+            }
+            this.drawBackgroundFadeIn();
+        }
+        this.context.globalAlpha = 1;
         this.globalObjects.update();
         if (this.activeStage) {
             this.activeStage.update();
@@ -107,6 +128,107 @@ export class Game {
             }
         }
         paper.project.clear();
+    }
+
+    setBackground(imagePath: string) {
+        this.fadeIn = 0;
+        this.fadeOut = 2;
+        if (!this.hasBackground) {
+            this.fadeIn = 1;
+        }
+        this.hasBackground = true;
+        this.prevBackgroundImage = this.backgroundImage;
+        const img = new Image();
+        img.src = `./gameEngine/GameImages/${imagePath}`;
+        img.onload = () => {
+            this.backgroundImage = img;
+        };
+    }
+
+    removeBackground() {
+        this.hasBackground = false;
+    }
+
+    drawBackgroundFadeIn() {
+        this.context.globalAlpha = this.fadeIn;
+        const loop = Math.floor(this.pos.x / this.backgroundImage.naturalWidth);
+        if (this.pos.y >= 0) {
+            this.context.drawImage(
+                this.backgroundImage,
+                this.backgroundImage.naturalWidth * loop,
+                -this.pos.y
+            );
+            this.context.drawImage(
+                this.backgroundImage,
+                this.backgroundImage.naturalWidth * (loop + 1),
+                -this.pos.y
+            );
+        } else if (this.scrollHeight < 100) {
+            this.context.drawImage(
+                this.backgroundImage,
+                this.backgroundImage.naturalWidth * loop,
+                -this.pos.y - ((this.backgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
+            );
+            this.context.drawImage(
+                this.backgroundImage,
+                this.backgroundImage.naturalWidth * (loop + 1),
+                -this.pos.y - ((this.backgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
+            );
+        } else {
+            this.context.drawImage(
+                this.backgroundImage,
+                this.backgroundImage.naturalWidth * loop,
+                -(this.backgroundImage.naturalHeight - this.height) - this.pos.y
+            );
+            this.context.drawImage(
+                this.backgroundImage,
+                this.backgroundImage.naturalWidth * (loop + 1),
+                -(this.backgroundImage.naturalHeight - this.height) - this.pos.y
+            );
+        }
+        this.fadeIn = this.fadeIn >= 1 ? 1 : this.fadeIn + this.fadeSpeed;
+    }
+
+    drawBackgroundFadeOut() {
+        this.context.globalAlpha = this.fadeOut;
+        const loop = Math.floor(this.pos.x / this.prevBackgroundImage.naturalWidth);
+        if (this.pos.y >= 0) {
+            this.context.drawImage(
+                this.prevBackgroundImage,
+                this.prevBackgroundImage.naturalWidth * loop,
+                -this.pos.y
+            );
+            this.context.drawImage(
+                this.prevBackgroundImage,
+                this.prevBackgroundImage.naturalWidth * (loop + 1),
+                -this.pos.y
+            );
+        } else if (this.scrollHeight < 100) {
+            this.context.drawImage(
+                this.prevBackgroundImage,
+                this.prevBackgroundImage.naturalWidth * loop,
+                -this.pos.y -
+                    ((this.prevBackgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
+            );
+            this.context.drawImage(
+                this.prevBackgroundImage,
+                this.prevBackgroundImage.naturalWidth * (loop + 1),
+                -this.pos.y -
+                    ((this.prevBackgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
+            );
+        } else {
+            this.context.drawImage(
+                this.prevBackgroundImage,
+                this.prevBackgroundImage.naturalWidth * loop,
+                -(this.prevBackgroundImage.naturalHeight - this.height) - this.pos.y
+            );
+            this.context.drawImage(
+                this.prevBackgroundImage,
+                this.prevBackgroundImage.naturalWidth * (loop + 1),
+                -(this.prevBackgroundImage.naturalHeight - this.height) - this.pos.y
+            );
+        }
+        this.fadeOut = this.fadeOut <= 0 ? 0 : this.fadeOut - this.fadeSpeed;
     }
 
     addStage(stage: Stage) {

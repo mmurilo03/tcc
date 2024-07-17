@@ -37,6 +37,8 @@ export class Wolf extends GameObjectDynamic {
 
     update() {
         super.update();
+        const pos = this.getPositionFromBorder();
+        
         if (!this.game?.inputs.includes("a") && !this.game?.inputs.includes("d")) {
             this.state = "idle";
         }
@@ -45,7 +47,6 @@ export class Wolf extends GameObjectDynamic {
             this.game.inputs.indexOf("a") > this.game.inputs.indexOf("d")
         ) {
             this.x -= this.speed;
-            this.game.moveCamera(this.speed, 0);
             this.state = "running";
             this.flip = true;
         } else if (
@@ -53,7 +54,6 @@ export class Wolf extends GameObjectDynamic {
             this.game.inputs.indexOf("d") > this.game.inputs.indexOf("a")
         ) {
             this.x += this.speed;
-            this.game.moveCamera(-this.speed, 0);
             this.state = "running";
             this.flip = false;
         }
@@ -62,18 +62,24 @@ export class Wolf extends GameObjectDynamic {
             this.game.inputs.indexOf("w") > this.game.inputs.indexOf("s")
         ) {
             this.y -= this.speed;
-            this.game.moveCamera(0, this.speed);
             this.state = "running";
-            this.flip = true;
         } else if (
             this.game?.inputs.includes("s") &&
             this.game.inputs.indexOf("s") > this.game.inputs.indexOf("w")
         ) {
             this.y += this.speed;
-            this.game.moveCamera(0, -this.speed);
             this.state = "running";
-            this.flip = true;
         }
-        this.highlightObject();
+
+        if (pos.x < this.game.width*0.2) {            
+            this.game.moveCamera(-this.speed, 0);
+        } else if (pos.x+this.width > this.game.width*0.8) {
+            this.game.moveCamera(this.speed, 0);
+        }
+        if (pos.y < this.game.height*0.2) {            
+            this.game.moveCamera(0, this.speed);
+        } else if (pos.y+this.height > this.game.height*0.8) {
+            this.game.moveCamera(0, -this.speed);
+        }
     }
 }
