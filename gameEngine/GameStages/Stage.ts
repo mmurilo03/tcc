@@ -1,11 +1,14 @@
 import { GameObject } from "../GameObject/GameObject";
 import { Game } from "../Game";
+import { Background } from "./Background";
 
 export class Stage {
     stageObjects: GameObject[] = [];
     numberOfObjects: number = 0;
     game: Game;
     name: string;
+    activeBackground: Background | undefined;
+    backgrounds: Background[] = [];
 
     constructor(game: Game, name: string) {
         this.game = game;
@@ -29,5 +32,22 @@ export class Stage {
 
     remove(obj: GameObject) {
         this.stageObjects.slice(this.stageObjects.indexOf(obj), 1);
+    }
+
+    setBackground(imagePath: string) {
+        this.activeBackground = this.backgrounds.find((background: Background) => {
+            return background.imagePath == imagePath;
+        })
+        if (this.activeBackground) {
+            this.game.setBackground(imagePath);
+        }
+    }
+
+    addBackground(background: Background) {
+        this.backgrounds.push(background);
+    }
+
+    removeBackground(background: Background) {
+        this.backgrounds.slice(this.backgrounds.indexOf(background), 1);
     }
 }
