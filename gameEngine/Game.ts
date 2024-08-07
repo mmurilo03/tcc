@@ -2,6 +2,7 @@ import { Dimensions } from "./Interfaces/Dimensions.ts";
 import { Stage } from "./GameStages/Stage.ts";
 import { Coordinates } from "./Interfaces/GameObjectInterfaces.ts";
 import paper from "paper";
+import { Background } from "./GameStages/Background.ts";
 
 interface Stages {
     [propName: string]: Stage;
@@ -36,14 +37,14 @@ export class Game {
     context: CanvasRenderingContext2D;
     extraCanvas: HTMLCanvasElement;
     extraContext: CanvasRenderingContext2D;
-    hasBackground: boolean = false;
+
     prevBackgroundImage: HTMLImageElement = new Image();
     backgroundImage: HTMLImageElement = new Image();
-    scrollHeight: number;
-    scrollAmount: number = 1;
+    verticalScroll: number;
     fadeIn: number = 0;
     fadeOut: number = 2;
-    fadeSpeed: number = 0.005;
+    background: Background | undefined;
+
     pos: Coordinates = { x: 0, y: 0 };
     inputs: string[] = [];
     stages: Stages = {};
@@ -70,7 +71,7 @@ export class Game {
         this.extraContext = this.extraCanvas.getContext("2d", {
             willReadFrequently: true,
         }) as CanvasRenderingContext2D;
-        this.scrollHeight = 0;
+        this.verticalScroll = 0;
     }
 
     addInput(key: string) {
@@ -84,21 +85,23 @@ export class Game {
     }
 
     moveCamera(horizontal: number, vertical: number) {
-        this.context.translate(-horizontal, vertical);
-        if (vertical > 0) {
-            this.scrollHeight -= this.scrollAmount;
-        } else if (vertical < 0) {
-            this.scrollHeight += this.scrollAmount;
-        }
-        this.pos = { x: this.pos.x + horizontal, y: this.pos.y + vertical };
+        if (this.background) {
+            this.context.translate(-horizontal, vertical);
+            if (vertical > 0) {
+                this.verticalScroll -= this.background.verticalScroll;
+            } else if (vertical < 0) {
+                this.verticalScroll += this.background.verticalScroll;
+            }
+            this.pos = { x: this.pos.x + horizontal, y: this.pos.y + vertical };
 
-        this.horizontalOffset -= horizontal;
-        this.verticalOffset += vertical;
+            this.horizontalOffset -= horizontal;
+            this.verticalOffset += vertical;
+        }
     }
 
     update() {
         this.context.clearRect(-this.horizontalOffset, -this.verticalOffset, this.width, this.height);
-        if (this.hasBackground) {
+        if (this.background) {
             if (this.fadeOut > 0) {
                 this.drawBackgroundFadeOut();
             }
@@ -130,13 +133,13 @@ export class Game {
         paper.project.clear();
     }
 
-    setBackground(imagePath: string) {
+    setBackground(imagePath: string, background: Background) {
         this.fadeIn = 0;
         this.fadeOut = 2;
-        if (!this.hasBackground) {
+        if (!this.background) {
             this.fadeIn = 1;
         }
-        this.hasBackground = true;
+        this.background = background;
         this.prevBackgroundImage = this.backgroundImage;
         const img = new Image();
         img.src = `./gameEngine/GameImages/${imagePath}`;
@@ -146,89 +149,74 @@ export class Game {
     }
 
     removeBackground() {
-        this.hasBackground = false;
+        this.background = undefined;
     }
 
     drawBackgroundFadeIn() {
         this.context.globalAlpha = this.fadeIn;
-        const loop = Math.floor(this.pos.x / this.backgroundImage.naturalWidth);
-        if (this.pos.y >= 0) {
-            this.context.drawImage(
-                this.backgroundImage,
-                this.backgroundImage.naturalWidth * loop,
-                -this.pos.y
-            );
-            this.context.drawImage(
-                this.backgroundImage,
-                this.backgroundImage.naturalWidth * (loop + 1),
-                -this.pos.y
-            );
-        } else if (this.scrollHeight < 100) {
-            this.context.drawImage(
-                this.backgroundImage,
-                this.backgroundImage.naturalWidth * loop,
-                -this.pos.y - ((this.backgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
-            );
-            this.context.drawImage(
-                this.backgroundImage,
-                this.backgroundImage.naturalWidth * (loop + 1),
-                -this.pos.y - ((this.backgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
-            );
-        } else {
-            this.context.drawImage(
-                this.backgroundImage,
-                this.backgroundImage.naturalWidth * loop,
-                -(this.backgroundImage.naturalHeight - this.height) - this.pos.y
-            );
-            this.context.drawImage(
-                this.backgroundImage,
-                this.backgroundImage.naturalWidth * (loop + 1),
-                -(this.backgroundImage.naturalHeight - this.height) - this.pos.y
-            );
+
+        if (this.background?.repeatHorizontal) {
+            if (this.background.repeatVertical) {
+                this.drawBackgroundRepeatBoth(this.backgroundImage);
+            } else {
+                this.drawBackgroundRepeatHorizontal(this.backgroundImage);
+            }
         }
-        this.fadeIn = this.fadeIn >= 1 ? 1 : this.fadeIn + this.fadeSpeed;
+        if (this.background) {
+            this.fadeIn = this.fadeIn >= 1 ? 1 : this.fadeIn + this.background.fadeSpeed;
+        }
     }
 
     drawBackgroundFadeOut() {
         this.context.globalAlpha = this.fadeOut;
-        const loop = Math.floor(this.pos.x / this.prevBackgroundImage.naturalWidth);
+        if (this.background?.repeatHorizontal) {
+            if (this.background.repeatVertical) {
+                this.drawBackgroundRepeatBoth(this.prevBackgroundImage);
+            } else {
+                this.drawBackgroundRepeatHorizontal(this.prevBackgroundImage);
+            }
+        }
+    }
+
+    drawBackgroundRepeatHorizontal(image: HTMLImageElement) {
+        const loop = Math.floor(this.pos.x / image.naturalWidth);
+
         if (this.pos.y >= 0) {
+            this.context.drawImage(image, image.naturalWidth * loop, -this.pos.y);
+            this.context.drawImage(image, image.naturalWidth * (loop + 1), -this.pos.y);
+        } else if (this.verticalScroll < 100) {
             this.context.drawImage(
-                this.prevBackgroundImage,
-                this.prevBackgroundImage.naturalWidth * loop,
-                -this.pos.y
+                image,
+                image.naturalWidth * loop,
+                -this.pos.y - ((image.naturalHeight - this.height) * this.verticalScroll) / 100
             );
             this.context.drawImage(
-                this.prevBackgroundImage,
-                this.prevBackgroundImage.naturalWidth * (loop + 1),
-                -this.pos.y
-            );
-        } else if (this.scrollHeight < 100) {
-            this.context.drawImage(
-                this.prevBackgroundImage,
-                this.prevBackgroundImage.naturalWidth * loop,
-                -this.pos.y -
-                    ((this.prevBackgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
-            );
-            this.context.drawImage(
-                this.prevBackgroundImage,
-                this.prevBackgroundImage.naturalWidth * (loop + 1),
-                -this.pos.y -
-                    ((this.prevBackgroundImage.naturalHeight - this.height) * this.scrollHeight) / 100
+                image,
+                image.naturalWidth * (loop + 1),
+                -this.pos.y - ((image.naturalHeight - this.height) * this.verticalScroll) / 100
             );
         } else {
             this.context.drawImage(
-                this.prevBackgroundImage,
-                this.prevBackgroundImage.naturalWidth * loop,
-                -(this.prevBackgroundImage.naturalHeight - this.height) - this.pos.y
+                image,
+                image.naturalWidth * loop,
+                -(image.naturalHeight - this.height) - this.pos.y
             );
             this.context.drawImage(
-                this.prevBackgroundImage,
-                this.prevBackgroundImage.naturalWidth * (loop + 1),
-                -(this.prevBackgroundImage.naturalHeight - this.height) - this.pos.y
+                image,
+                image.naturalWidth * (loop + 1),
+                -(image.naturalHeight - this.height) - this.pos.y
             );
         }
-        this.fadeOut = this.fadeOut <= 0 ? 0 : this.fadeOut - this.fadeSpeed;
+    }
+
+    drawBackgroundRepeatBoth(image: HTMLImageElement) {
+        const loopH = Math.floor(this.pos.x / image.naturalWidth);
+        const loopV = Math.floor(this.pos.y / image.naturalHeight);
+
+        this.context.drawImage(image, image.naturalWidth * loopH, - image.naturalHeight * loopV);
+        this.context.drawImage(image, image.naturalWidth * (loopH + 1), -image.naturalHeight * loopV);
+        this.context.drawImage(image, image.naturalWidth * loopH, - image.naturalHeight * (loopV + 1));
+        this.context.drawImage(image, image.naturalWidth * (loopH + 1), - image.naturalHeight * (loopV + 1));
     }
 
     addStage(stage: Stage) {

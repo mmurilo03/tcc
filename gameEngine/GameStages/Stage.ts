@@ -39,7 +39,7 @@ export class Stage {
             return background.imagePath == imagePath;
         })
         if (this.activeBackground) {
-            this.game.setBackground(imagePath);
+            this.game.setBackground(imagePath, this.activeBackground);
         }
     }
 
