@@ -172,6 +172,8 @@ export class Game {
         } else {
             if (this.background?.repeatVertical) {
                 this.drawBackgroundRepeatVertical(this.backgroundImage);
+            } else {
+                this.drawBackgroundNoRepeat(this.backgroundImage)
             }
         }
         if (this.background) {
@@ -190,6 +192,8 @@ export class Game {
         } else {
             if (this.background?.repeatVertical) {
                 this.drawBackgroundRepeatVertical(this.prevBackgroundImage);
+            } else {
+                this.drawBackgroundNoRepeat(this.backgroundImage)
             }
         }
     }
@@ -264,6 +268,34 @@ export class Game {
         this.context.drawImage(image, image.naturalWidth * (loopH + 1), -image.naturalHeight * loopV);
         this.context.drawImage(image, image.naturalWidth * loopH, - image.naturalHeight * (loopV + 1));
         this.context.drawImage(image, image.naturalWidth * (loopH + 1), - image.naturalHeight * (loopV + 1));
+    }
+
+    drawBackgroundNoRepeat(image: HTMLImageElement) {
+        if (this.pos.x <= 0) {
+            if (this.pos.y >= 0) {
+                this.context.drawImage(image, this.pos.x, -this.pos.y);
+            } else if (this.verticalScroll < 100) {
+                this.context.drawImage(image, this.pos.x, -this.pos.y - ((image.naturalHeight - this.height) * this.verticalScroll) / 100);
+            } else {
+                this.context.drawImage(image, this.pos.x, -(image.naturalHeight - this.height) - this.pos.y);
+            }
+        } else if (this.horizontalScroll < 100) {
+            if (this.pos.y >= 0) {
+                this.context.drawImage(image, this.pos.x - ((image.naturalWidth) - this.width) * this.horizontalScroll / 100, -this.pos.y);
+            } else if (this.verticalScroll < 100) {
+                this.context.drawImage(image, this.pos.x - ((image.naturalWidth) - this.width) * this.horizontalScroll / 100, -this.pos.y - ((image.naturalHeight - this.height) * this.verticalScroll) / 100);
+            } else {
+                this.context.drawImage(image, this.pos.x - ((image.naturalWidth) - this.width) * this.horizontalScroll / 100, -(image.naturalHeight - this.height) - this.pos.y);
+            }
+        } else {
+            if (this.pos.y >= 0) {
+                this.context.drawImage(image, this.pos.x - (image.naturalWidth - this.width), -this.pos.y);
+            } else if (this.verticalScroll < 100) {
+                this.context.drawImage(image, this.pos.x - (image.naturalWidth - this.width), -this.pos.y - ((image.naturalHeight - this.height) * this.verticalScroll) / 100);
+            } else {
+                this.context.drawImage(image, this.pos.x - (image.naturalWidth - this.width), -(image.naturalHeight - this.height) - this.pos.y);
+            }
+        }
     }
 
     addStage(stage: Stage) {
