@@ -190,6 +190,8 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
+        if (!this.checkLeftRightAdjusted(otherObject, horizontalDistance) || !this.checkUpDownAdjusted(otherObject, verticalDistance)) return false;
+        
         otherObject.updateOutline();
         let otherObjectOutline = otherObject.outline;
 
@@ -214,15 +216,15 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.checkObjectIsToTheRight(otherObject)) {
             distance.x = otherObject.x - (this.x + this.width);
         } else {
-            let dist = this.x - (otherObject.x + otherObject.width)
-            distance.x = dist <= 0 ? 0 : dist
+            let dist = (otherObject.x + otherObject.width) - this.x
+            distance.x = dist >= 0 ? 0 : dist
         }
 
         if (this.checkObjectIsBelow(otherObject)) {
             distance.y = otherObject.y - (this.y + this.height);
         } else {
-            let dist = this.y - (otherObject.y + otherObject.height)
-            distance.y = dist <= 0 ? 0 : dist
+            let dist = (otherObject.y + otherObject.height) - this.y
+            distance.y = dist >= 0 ? 0 : dist
         }
 
         return distance;
@@ -262,12 +264,35 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         return false;
     }
 
+    checkLeftRightAdjusted(otherObject: GameObject, horizontalDistance: number) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisWidthPlusX = this.x + this.width + horizontalDistance;
+        let otherWidthPlusX = otherObject.x + otherObject.width;
+        if (thisWidthPlusX > otherObject.x && this.x < otherWidthPlusX) {
+            return true;
+        }
+        return false;
+    }
+
     checkUpDown(otherObject: GameObject) {
         if (this.loading || otherObject.loading) {
             return false;
         }
-        this.updateOutline();
         let thisHeightPlusY = this.y + this.height;
+        let otherHeightPlusY = otherObject.y + otherObject.height;
+        if (thisHeightPlusY > otherObject.y && this.y < otherHeightPlusY) {
+            return true;
+        }
+        return false;
+    }
+
+    checkUpDownAdjusted(otherObject: GameObject, verticalDistance: number) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisHeightPlusY = this.y + this.height + verticalDistance;
         let otherHeightPlusY = otherObject.y + otherObject.height;
         if (thisHeightPlusY > otherObject.y && this.y < otherHeightPlusY) {
             return true;
