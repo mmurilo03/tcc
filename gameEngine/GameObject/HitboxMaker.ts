@@ -5,7 +5,7 @@ import {
     HitboxMakerProperties,
 } from "../Interfaces/HitboxMakerInterfaces";
 import paper from "paper";
-import { api } from "../axios";
+import { api } from "../api/axios";
 
 interface DirectionPixels {
     pixelLeft: number;
@@ -20,7 +20,6 @@ interface DirectionCoords {
     rightCoord: Coordinates;
     downCoord: Coordinates;
 }
-
 
 export interface ExportedObject {
     hitboxCount: number;
