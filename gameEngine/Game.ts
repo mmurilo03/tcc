@@ -81,6 +81,11 @@ export class Game {
         this.inputs.push(key);
     }
 
+    start = () => {
+        this.update();
+        requestAnimationFrame(this.start);
+    };
+
     removeInput(key: string) {
         if (!this.inputs.includes(key)) return;
         this.inputs.splice(this.inputs.indexOf(key), 1);

@@ -8,8 +8,3 @@ for (let Stage of allStages) {
 }
 
 game.changeStage("Stage 1");
-
-export const animate = () => {
-    game.update();
-    requestAnimationFrame(animate);
-};

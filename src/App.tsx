@@ -1,5 +1,5 @@
 import "./App.css";
-import { game, animate } from "../gameEngine/main";
+import { game } from "../gameEngine/main";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { HitboxMaker } from "../gameEngine/GameObject/HitboxMaker";
 import { GameObject } from "../gameEngine/GameObject/GameObject";
@@ -86,7 +86,7 @@ function App() {
         if (!called.current) {
             loadGame().then((res) => {
                 setLoading(res);
-                animate();
+                game.start();
             });
             called.current = true;
         }
