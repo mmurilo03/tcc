@@ -4,29 +4,36 @@ import { MouseEvent, useEffect, useRef, useState } from "react";
 import { HitboxMaker } from "../gameEngine/GameObject/HitboxMaker";
 import { GameObject } from "../gameEngine/GameObject/GameObject";
 
+const hitboxMaker = new HitboxMaker({ context: game.context });
+
 const buildImage = async (obj: GameObject) => {
-    await new HitboxMaker().initialize({
-        context: game.context,
+    await hitboxMaker.initialize({
         imagePath: obj.imagePath,
         height: obj.height,
         width: obj.width,
         precision: obj.precision,
     });
     for (let otherObj of obj.otherObjects) {
-        await buildImage(otherObj);
+        if (!hitboxMaker.checkIfSaved(otherObj.imagePath)) {
+            await buildImage(otherObj);
+        }
     }
     await obj.loadImage();
 };
 
 const loadGame = async () => {
     for (let obj of game.globalObjects.stageObjects) {
-        await buildImage(obj);
+        if (!hitboxMaker.checkIfSaved(obj.imagePath)) {
+            await buildImage(obj);
+        }
     }
 
     for (let stage in game.stages) {
         let currentStage = game.stages[stage];
         for (let obj of currentStage.stageObjects) {
-            await buildImage(obj);
+            if (!hitboxMaker.checkIfSaved(obj.imagePath)) {
+                await buildImage(obj);
+            }
         }
     }
     return false;
