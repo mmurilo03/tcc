@@ -31,7 +31,7 @@ export class Stage {
     }
 
     remove(obj: GameObject) {
-        this.stageObjects.slice(this.stageObjects.indexOf(obj), 1);
+        this.stageObjects.splice(this.stageObjects.indexOf(obj), 1);
     }
 
     setBackground(imagePath: string) {
