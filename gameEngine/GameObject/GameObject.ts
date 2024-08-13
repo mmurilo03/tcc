@@ -1,29 +1,20 @@
-import {
-    AnimationFrame,
-    Coordinates,
-    GameObjectInterface,
-    GameObjectHiddenProperties,
-    GameObjectProperties,
-    ObjectProps,
-} from "../Interfaces/GameObjectInterfaces";
-import { exports } from "../exports.json";
+import { Coordinates, GameObjectHiddenProperties, ObjectProps } from "../Interfaces/GameObjectInterfaces";
 import { Game } from "../Game";
+import { ExportedObject } from "./HitboxMaker";
+import paper from "paper";
 
-export class GameObject
-    implements ObjectProps, GameObjectInterface, GameObjectProperties, GameObjectHiddenProperties
-{
+export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     // ObjectProps
     game: Game;
-    context: CanvasRenderingContext2D;
     x: number;
     y: number;
     precision: number = 2.5;
-    // GameObjectInterface
     imagePath: string;
     width: number;
     height: number;
     clickable: boolean = false;
 
+    context: CanvasRenderingContext2D;
     // GameObjectHiddenProperties
     imageElement: HTMLImageElement;
     loading: boolean = true;
@@ -31,6 +22,11 @@ export class GameObject
     activeFrame: number;
     frameCounter: number;
     flip: boolean = false;
+    // Array with frames
+    // Array with each outline of a frame
+    // Array of points
+    hitboxes: string[][][];
+    animationImagePosition: Coordinates[];
     clicked: boolean = false;
     highlighted: boolean = false;
     outline: string = "";
@@ -38,74 +34,66 @@ export class GameObject
     fillColor: string = "black";
     outlineWidth: number = 1;
     name: string = "";
-    // Array with frames
-    // Array with each outline of a frame
-    // Array of points
-    hitboxes: string[][][];
-    animationImagePosition: Coordinates[];
+    flippedImageElement: HTMLImageElement;
 
-    // GameObjectProperties
-    state: string;
-    animationFrames: AnimationFrame;
-    previousState: string;
     otherObjects: GameObject[] = [];
 
-    constructor(
-        objectProps: ObjectProps,
-        gameObjectInterface: GameObjectInterface,
-        gameObjectProperties: GameObjectProperties
-    ) {
+    constructor(objectProps: ObjectProps) {
         this.game = objectProps.game;
-        this.context = objectProps.context;
         this.x = objectProps.x;
         this.y = objectProps.y;
-        this.precision = objectProps.precision ? objectProps.precision : 2.5;
-        this.imagePath = gameObjectInterface.imagePath;
-        this.width = gameObjectInterface.width;
-        this.height = gameObjectInterface.height;
-        this.clickable = gameObjectInterface.clickable;
+        this.precision = objectProps.precision ? objectProps.precision : 10;
+        this.imagePath = objectProps.imagePath;
+        this.width = objectProps.width;
+        this.height = objectProps.height;
+        this.clickable = objectProps.clickable;
 
-        this.state = gameObjectProperties.state;
-        this.previousState = gameObjectProperties.state;
-        this.animationFrames = gameObjectProperties.animationFrames;
+        this.context = this.game.context;
 
         this.hitboxCount = 0;
         this.activeFrame = 0;
         this.frameCounter = 0;
-        // this.flip = false;
         this.hitboxes = []; // points of the hitbox
         this.animationImagePosition = []; // animation frame count per line on image
         const img = new Image();
         this.imageElement = img;
-        this.loadImage().then(() => {
-            this.loadFromExport();
-        });
+        this.flippedImageElement = img;
     }
 
-    loadImage() {
-        return new Promise((resolve, reject) => {
+    async loadImage() {
+        await new Promise((resolve, reject) => {
             const img = new Image();
             img.src = `./gameEngine/GameImages/${this.imagePath}`;
             img.onload = () => {
                 this.imageElement = img;
+                this.game.extraCanvas.width = this.imageElement.naturalWidth;
+                this.game.extraCanvas.height = this.imageElement.naturalHeight;
+                this.game.extraContext.save();
+                this.game.extraContext.translate(this.game.extraCanvas.width, 0);
+                this.game.extraContext.scale(-1, 1);
+                this.game.extraContext.drawImage(this.imageElement, 0, 0);
+                this.flippedImageElement.src = this.game.extraCanvas.toDataURL();
+                this.game.extraContext.clearRect(0, 0, this.game.width, this.game.height);
+                this.game.extraContext.restore();
                 resolve("done");
             };
             img.onerror = (error) => {
                 reject(error);
             };
         });
+        await this.loadFromExport();
     }
 
-    loadFromExport() {
-        while (this.loading) {
-            this.hitboxCount = exports[this.imagePath as keyof typeof exports].hitboxCount;
-            this.hitboxes = exports[this.imagePath as keyof typeof exports].hitboxes;
-            this.animationImagePosition =
-                exports[this.imagePath as keyof typeof exports].animationImagePosition;
-            if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
-                this.loading = false;
-                break;
-            }
+    async loadFromExport() {
+        let ex = await fetch(new URL("../exports.json", import.meta.url));
+        let json = await ex.json();
+        let exportedObject: ExportedObject = json.exports[this.imagePath];
+
+        this.hitboxCount = exportedObject.hitboxCount;
+        this.hitboxes = exportedObject.hitboxes;
+        this.animationImagePosition = exportedObject.animationImagePosition;
+        if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
+            this.loading = false;
         }
     }
 
@@ -119,7 +107,7 @@ export class GameObject
 
     updateOutline() {
         // For each animation frame, get every outline and draw it
-        this.outline = `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
+        this.outline = `M${this.x} ${this.y}`;
         if (this.loading) {
             this.loadFromExport();
             if (this.highlighted) {
@@ -129,13 +117,26 @@ export class GameObject
         }
         for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
             let currentOutline = this.hitboxes[this.activeFrame][outline];
-            this.outline += currentOutline[0] + `M${this.flip ? -this.x - this.width : this.x} ${this.y}`;
+            this.outline += currentOutline[0] + `M${this.x} ${this.y}`;
+        }
+        if (this.flip) {
+            let path = new paper.Path(this.outline);
+            let pathX = path.position.x - path.bounds.width / 2;
+            let ajustment = this.x - pathX;
+            let translate = this.x + this.width - (pathX + path.bounds.width) + ajustment;
+            path.scale(-1, 1);
+            path.translate([translate, 0]);
+            this.outline = path.pathData;
         }
     }
 
     getOutline() {
         this.updateOutline();
         return this.outline;
+    }
+
+    getPositionFromBorder() {
+        return { x: -this.game.pos.x + this.x, y: this.game.pos.y + this.y }
     }
 
     detectClick() {
@@ -168,34 +169,173 @@ export class GameObject
         );
     }
 
-    draw() {
-        if (this.flip) {
-            this.context.scale(-1, 1);
+    checkCollision(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
         }
+        if (!this.checkLeftRight(otherObject) || !this.checkUpDown(otherObject)) return false;
+        
+        otherObject.updateOutline();
+        let otherObjectOutline = otherObject.outline;
+
+        let path = new paper.Path(otherObjectOutline);
+        this.updateOutline();
+        let thisObjectPath = new paper.Path(this.outline);
+
+        let collision = path.intersects(thisObjectPath) ? true : false;
+        return collision;
+    }
+
+    checkIfWillCollide(otherObject: GameObject, horizontalDistance: number, verticalDistance: number) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        if (!this.checkLeftRightAdjusted(otherObject, horizontalDistance) || !this.checkUpDownAdjusted(otherObject, verticalDistance)) return false;
+        
+        otherObject.updateOutline();
+        let otherObjectOutline = otherObject.outline;
+
+        let path = new paper.Path(otherObjectOutline);
+        this.updateOutline();
+        let thisObjectPath = new paper.Path(this.outline);
+        thisObjectPath.translate([horizontalDistance, verticalDistance]);
+
+        let collision = path.intersects(thisObjectPath) ? true : false;
+        return collision;
+    }
+
+    checkDistance(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        otherObject.updateOutline();
+        this.updateOutline();
+
+        let distance = { x: 0, y: 0 };
+
+        if (this.checkObjectIsToTheRight(otherObject)) {
+            distance.x = otherObject.x - (this.x + this.width);
+        } else {
+            let dist = (otherObject.x + otherObject.width) - this.x
+            distance.x = dist >= 0 ? 0 : dist
+        }
+
+        if (this.checkObjectIsBelow(otherObject)) {
+            distance.y = otherObject.y - (this.y + this.height);
+        } else {
+            let dist = (otherObject.y + otherObject.height) - this.y
+            distance.y = dist >= 0 ? 0 : dist
+        }
+
+        return distance;
+    }
+
+    checkObjectIsToTheRight(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisWidthPlusX = this.x + this.width;
+        if (thisWidthPlusX < otherObject.x) {
+            return true;
+        }
+        return false;
+    }
+
+    checkObjectIsBelow(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisHeightPlusY = this.y + this.height;
+        if (thisHeightPlusY < otherObject.y) {
+            return true;
+        }
+        return false;
+    }
+
+    checkLeftRight(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisWidthPlusX = this.x + this.width;
+        let otherWidthPlusX = otherObject.x + otherObject.width;
+        if (thisWidthPlusX > otherObject.x && this.x < otherWidthPlusX) {
+            return true;
+        }
+        return false;
+    }
+
+    checkLeftRightAdjusted(otherObject: GameObject, horizontalDistance: number) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisWidthPlusX = this.x + this.width + horizontalDistance;
+        let otherWidthPlusX = otherObject.x + otherObject.width;
+        if (thisWidthPlusX > otherObject.x && this.x < otherWidthPlusX) {
+            return true;
+        }
+        return false;
+    }
+
+    checkUpDown(otherObject: GameObject) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisHeightPlusY = this.y + this.height;
+        let otherHeightPlusY = otherObject.y + otherObject.height;
+        if (thisHeightPlusY > otherObject.y && this.y < otherHeightPlusY) {
+            return true;
+        }
+        return false;
+    }
+
+    checkUpDownAdjusted(otherObject: GameObject, verticalDistance: number) {
+        if (this.loading || otherObject.loading) {
+            return false;
+        }
+        let thisHeightPlusY = this.y + this.height + verticalDistance;
+        let otherHeightPlusY = otherObject.y + otherObject.height;
+        if (thisHeightPlusY > otherObject.y && this.y < otherHeightPlusY) {
+            return true;
+        }
+        return false;
+    }
+
+    draw() {
         if (this.loading) {
             this.loadFromExport();
             return;
         }
-        this.context.drawImage(
-            this.imageElement,
-            this.animationImagePosition[this.activeFrame].x,
-            this.animationImagePosition[this.activeFrame].y,
-            this.width,
-            this.height,
-            this.flip ? -this.x - this.width : this.x,
-            this.y,
-            this.width,
-            this.height
-        );
+        if (this.flip) {
+            this.context.drawImage(
+                this.flippedImageElement,
+                this.imageElement.naturalWidth - this.width - this.animationImagePosition[this.activeFrame].x,
+                this.animationImagePosition[this.activeFrame].y,
+                this.width,
+                this.height,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+        } else {
+            this.context.drawImage(
+                this.imageElement,
+                this.animationImagePosition[this.activeFrame].x,
+                this.animationImagePosition[this.activeFrame].y,
+                this.width,
+                this.height,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+        }
         if (this.highlighted) {
             this.context.fillStyle = this.fillColor;
             this.context.strokeStyle = this.outlineColor;
             this.context.lineWidth = this.outlineWidth;
             const path = new Path2D(this.outline);
             this.context.stroke(path);
-        }
-        if (this.flip) {
-            this.context.scale(-1, 1);
         }
     }
 }

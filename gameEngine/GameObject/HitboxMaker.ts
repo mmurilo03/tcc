@@ -1,12 +1,12 @@
 import {
     Coordinates,
     CoordinatesAsKey,
+    HitboxMakerInitialize,
     HitboxMakerInterface,
     HitboxMakerProperties,
 } from "../Interfaces/HitboxMakerInterfaces";
 import paper from "paper";
-import { exports } from "../exports.json";
-import { api } from "../axios";
+import { api } from "../api/axios";
 
 interface DirectionPixels {
     pixelLeft: number;
@@ -22,8 +22,14 @@ interface DirectionCoords {
     downCoord: Coordinates;
 }
 
+export interface ExportedObject {
+    hitboxCount: number;
+    hitboxes: string[][][];
+    animationImagePosition: Coordinates[];
+}
+
 export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties {
-    context!: CanvasRenderingContext2D;
+    context: CanvasRenderingContext2D;
     imagePath!: string;
     width!: number;
     height!: number;
@@ -44,13 +50,17 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         animationImagePosition: [],
     };
     loading: boolean = true;
+    savedHitboxes: { [propName: string]: string } = {};
 
-    async initialize(hitboxMakerInterface: HitboxMakerInterface) {
+    constructor(hitboxMakerInterface: HitboxMakerInterface) {
         this.context = hitboxMakerInterface.context;
-        this.width = hitboxMakerInterface.width;
-        this.height = hitboxMakerInterface.height;
-        this.imagePath = hitboxMakerInterface.imagePath;
-        this.precision = hitboxMakerInterface.precision ? hitboxMakerInterface.precision : 10;
+    }
+
+    async initialize(hitboxMakerInitialize: HitboxMakerInitialize) {
+        this.imagePath = hitboxMakerInitialize.imagePath;
+        this.width = hitboxMakerInitialize.width;
+        this.height = hitboxMakerInitialize.height;
+        this.precision = hitboxMakerInitialize.precision ? hitboxMakerInitialize.precision : 10;
 
         this.hitboxCount = 0;
         this.activeFrame = 0;
@@ -60,11 +70,22 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         const img = new Image();
         this.imageElement = img;
 
+        if (this.checkIfSaved(this.imagePath)) {
+            return;
+        }
+        this.savedHitboxes[this.imagePath] = this.imagePath;
+
+        let ex = await fetch(new URL("../exports.json", import.meta.url));
+        let json = await ex.json();
+
+        if (Object.keys(json.exports).includes(this.imagePath)) {
+            return;
+        }
         await new Promise((resolve, reject) => {
             img.src = `./gameEngine/GameImages/${this.imagePath}`;
             img.onload = async () => {
                 this.imageElement = img;
-                if (!Object.keys(exports).includes(this.imagePath)) {
+                if (!Object.keys(json.exports).includes(this.imagePath)) {
                     this.countHitboxes();
                     await this.loadHitBox();
                 }
@@ -72,7 +93,10 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             };
             img.onerror = reject;
         });
-        return new HitboxMaker();
+    }
+
+    checkIfSaved(imagePath: string) {
+        return this.savedHitboxes[imagePath];
     }
 
     eraseImage(outline: Coordinates[], outlineUniqueKeys: CoordinatesAsKey) {
@@ -137,7 +161,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
                 break;
             }
         }
-        console.log("HITBOX COUNT: ", this.hitboxCount);
+        // console.log("HITBOX COUNT: ", this.hitboxCount);
     }
 
     async loadHitBox() {
@@ -294,14 +318,14 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             animationImagePosition: this.animationImagePosition,
         };
 
-        this.finalHitbox.hitboxes.forEach(async (hitbox) => {
+        for (let hitbox of this.finalHitbox.hitboxes) {
             await api.post("/objects", {
                 imagePath: this.imagePath,
                 hitboxCount: this.finalHitbox.hitboxCount,
                 hitbox: hitbox,
                 animationImagePosition: this.finalHitbox.animationImagePosition,
             });
-        });
+        }
     }
 
     drawOutline(

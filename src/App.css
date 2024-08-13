@@ -5,7 +5,6 @@
 }
 
 .outline {
-  outline: 5px solid black;
   max-width: calc(100% - 10px);
   max-height: calc(100vh - 10px);
   display: flex;
@@ -14,6 +13,7 @@
 }
 
 .canvas * {
+  outline: 5px solid black;
   max-width: 100%;
   max-height: 100vh;
 }

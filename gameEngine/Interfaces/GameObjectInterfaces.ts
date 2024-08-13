@@ -7,17 +7,19 @@ export interface Coordinates {
 
 export interface ObjectProps {
     game: Game;
-    context: CanvasRenderingContext2D;
     x: number;
     y: number;
     precision?: number;
-}
-
-export interface GameObjectInterface {
     imagePath: string;
     width: number;
     height: number;
     clickable: boolean;
+}
+
+export interface ObjectPropsSimple {
+    game: Game;
+    x: number;
+    y: number;
 }
 
 export interface GameObjectHiddenProperties {
@@ -36,14 +38,14 @@ export interface GameObjectHiddenProperties {
     fillColor: string;
     outlineWidth: number;
     name?: string;
+    flippedImageElement: HTMLImageElement;
 }
 
 export interface AnimationFrame {
     [propName: string]: { start: number; end: number; duration: number };
 }
 
-export interface GameObjectProperties {
+export interface DynamicGameObjectProperties {
     state: string;
     animationFrames: AnimationFrame;
-    previousState?: string;
 }

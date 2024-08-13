@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "api": "npx tsx ./gameEngine/api.ts",
+    "api": "npx tsx ./gameEngine/api/api.ts",
     "dev": "npx tsx ./gameEngine/init.ts && npm-run-all --parallel dev2 api",
     "dev2": "vite",
     "build": "tsc && vite build",

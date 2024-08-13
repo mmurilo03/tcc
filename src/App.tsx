@@ -4,16 +4,23 @@ import { MouseEvent, useEffect, useRef, useState } from "react";
 import { HitboxMaker } from "../gameEngine/GameObject/HitboxMaker";
 import { GameObject } from "../gameEngine/GameObject/GameObject";
 
+const hitboxMaker = new HitboxMaker({ context: game.context });
+
 const buildImage = async (obj: GameObject) => {
-    await new HitboxMaker().initialize({
-        context: game.context,
-        imagePath: obj.imagePath,
-        height: obj.height,
-        width: obj.width,
-        precision: obj.precision,
-    });
+    if (!hitboxMaker.checkIfSaved(obj.imagePath)) {
+        await hitboxMaker.initialize({
+            imagePath: obj.imagePath,
+            height: obj.height,
+            width: obj.width,
+            precision: obj.precision,
+        });
+    }
+    await obj.loadImage();
+
     for (let otherObj of obj.otherObjects) {
-        await buildImage(otherObj);
+        if (!hitboxMaker.checkIfSaved(otherObj.imagePath)) {
+            await buildImage(otherObj);
+        }
     }
 };
 
@@ -28,6 +35,7 @@ const loadGame = async () => {
             await buildImage(obj);
         }
     }
+
     return false;
 };
 
@@ -83,7 +91,10 @@ function App() {
 
     useEffect(() => {
         if (!called.current) {
-            loadGame().then((res) => setLoading(res));
+            loadGame().then((res) => {
+                setLoading(res);
+                game.start();
+            });
             called.current = true;
         }
     }, []);

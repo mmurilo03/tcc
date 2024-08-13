@@ -9,6 +9,9 @@ export interface CoordinatesAsKey {
 
 export interface HitboxMakerInterface {
     context: CanvasRenderingContext2D;
+}
+
+export interface HitboxMakerInitialize {
     imagePath: string;
     width: number;
     height: number;
@@ -23,4 +26,5 @@ export interface HitboxMakerProperties {
     animationImagePosition: Array<Coordinates>;
     finalHitbox: { hitboxCount: number; hitboxes: string[][][]; animationImagePosition: Coordinates[] };
     loading: boolean;
+    savedHitboxes : { [propName: string]: string }
 }
