@@ -25,6 +25,7 @@ export class Stage {
     }
 
     add(obj: GameObject) {
+        obj.loadImage();
         this.stageObjects.push(obj);
         this.numberOfObjects++;
         this.numberOfObjects += obj.otherObjects.length;
