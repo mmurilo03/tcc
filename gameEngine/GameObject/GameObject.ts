@@ -89,9 +89,9 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         let json = await ex.json();
         let exportedObject: ExportedObject = json.exports[this.imagePath];
 
-        this.hitboxCount = exportedObject.hitboxCount;
-        this.hitboxes = exportedObject.hitboxes;
-        this.animationImagePosition = exportedObject.animationImagePosition;
+        this.hitboxCount = exportedObject?.hitboxCount;
+        this.hitboxes = exportedObject?.hitboxes;
+        this.animationImagePosition = exportedObject?.animationImagePosition;
         if (this.hitboxCount > 0 && this.hitboxes.length > 0 && this.animationImagePosition.length > 0) {
             this.loading = false;
         }
