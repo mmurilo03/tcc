@@ -1,9 +1,11 @@
 import { GameObject } from "../GameObject/GameObject";
 import { Game } from "../Game";
 import { Background } from "./Background";
+import { Button } from "../GameButton/Button";
 
 export class Stage {
     stageObjects: GameObject[] = [];
+    stageButtons: Button[] = [];
     numberOfObjects: number = 0;
     game: Game;
     name: string;
@@ -22,16 +24,26 @@ export class Stage {
                 this.stageObjects[i].draw();
             }
         }
+        for (let i = this.stageButtons.length - 1; i >= 0; i--) {
+            if (!this.stageButtons[i].loading) {
+                this.stageButtons[i].update();
+                this.stageButtons[i].draw();
+            }
+        }
     }
 
-    add(obj: GameObject) {
+    addObject(obj: GameObject) {
         obj.loadImage();
         this.stageObjects.push(obj);
         this.numberOfObjects++;
         this.numberOfObjects += obj.otherObjects.length;
     }
 
-    remove(obj: GameObject) {
+    addButton(button: Button) {        
+        this.stageButtons.push(button);
+    }
+
+    removeObject(obj: GameObject) {
         this.stageObjects.splice(this.stageObjects.indexOf(obj), 1);
     }
 
