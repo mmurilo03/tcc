@@ -50,7 +50,7 @@ export class Game {
     inputs: string[] = [];
     stages: Stages = {};
     activeStage?: Stage;
-    globalObjects: Stage = new Stage(this, "global");
+    globalStage?: Stage;
     mousePos: Coordinates = { x: 0, y: 0 };
     mouseClick: boolean = false;
 
@@ -121,7 +121,6 @@ export class Game {
             this.drawBackgroundFadeIn();
         }
         this.context.globalAlpha = 1;
-        this.globalObjects.update();
         if (this.activeStage) {
             this.activeStage.update();
         }
@@ -305,14 +304,21 @@ export class Game {
 
     addStage(stage: Stage) {
         if (stage.name == "global") {
-            this.globalObjects = stage;
+            this.globalStage = stage;
         } else {
             this.stages[stage.name] = stage;
         }
     }
 
     changeStage(name: string) {
+        if (this.globalStage) {
+            for (let obj of this.globalStage.stageObjects) {
+                this.stages[name].addGlobalObject(obj);
+                this.activeStage?.removeGlobalObject(obj);
+            }
+        }
         this.activeStage = this.stages[name];
+        this.activeStage.init();
     }
 
     updateMousePos(screenSize: { width: number; height: number }, newPos: Coordinates) {

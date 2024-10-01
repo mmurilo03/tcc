@@ -25,8 +25,10 @@ const buildImage = async (obj: GameObject) => {
 };
 
 const loadGame = async () => {
-    for (let obj of game.globalObjects.stageObjects) {
-        await buildImage(obj);
+    if (game.globalStage) {
+        for (let obj of game.globalStage.stageObjects) {
+            await buildImage(obj);
+        }
     }
 
     for (let stage in game.stages) {
