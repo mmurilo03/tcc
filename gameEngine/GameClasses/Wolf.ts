@@ -20,15 +20,18 @@ export class Wolf extends GameObjectDynamic {
             {
                 state: "idle",
                 animationFrames: {
-                    idle: { start: 0, end: 6, duration: 5 },
-                    jumpingUp: { start: 7, end: 13, duration: 5 },
-                    jumpingDown: { start: 14, end: 20, duration: 5 },
-                    running: { start: 21, end: 29, duration: 5 },
-                    stun: { start: 30, end: 40, duration: 5 },
-                    crouch: { start: 41, end: 45, duration: 5 },
-                    rolling: { start: 46, end: 52, duration: 5 },
-                    something: { start: 53, end: 59, duration: 5 },
-                    damaged: { start: 60, end: 75, duration: 5 },
+                    idle: { duration: 5, frames: [0, 1, 2, 3, 4, 5, 6] },
+                    jumpingUp: { duration: 5, frames: [7, 8, 9, 10, 11, 12, 13] },
+                    jumpingDown: { duration: 5, frames: [14, 15, 16, 17, 18, 19, 20] },
+                    running: { duration: 5, frames: [21, 22, 23, 24, 25, 26, 27, 28, 29] },
+                    stun: { duration: 5, frames: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40] },
+                    crouch: { duration: 5, frames: [41, 42, 43, 44, 45] },
+                    rolling: { duration: 5, frames: [46, 47, 48, 49, 50, 51, 52] },
+                    something: { duration: 5, frames: [53, 54, 55, 56, 57, 58, 59] },
+                    damaged: {
+                        duration: 5,
+                        frames: [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75],
+                    },
                 },
             }
         );
@@ -38,7 +41,7 @@ export class Wolf extends GameObjectDynamic {
     update() {
         super.update();
         const pos = this.getPositionFromBorder();
-        
+
         if (!this.game?.inputs.includes("a") && !this.game?.inputs.includes("d")) {
             this.state = "idle";
         }
@@ -71,14 +74,14 @@ export class Wolf extends GameObjectDynamic {
             this.state = "running";
         }
 
-        if (pos.x < this.game.width*0.2) {            
+        if (pos.x < this.game.width * 0.2) {
             this.game.moveCamera(-this.speed, 0);
-        } else if (pos.x+this.width > this.game.width*0.8) {
+        } else if (pos.x + this.width > this.game.width * 0.8) {
             this.game.moveCamera(this.speed, 0);
         }
-        if (pos.y < this.game.height*0.2) {            
+        if (pos.y < this.game.height * 0.2) {
             this.game.moveCamera(0, this.speed);
-        } else if (pos.y+this.height > this.game.height*0.8) {
+        } else if (pos.y + this.height > this.game.height * 0.8) {
             this.game.moveCamera(0, -this.speed);
         }
     }

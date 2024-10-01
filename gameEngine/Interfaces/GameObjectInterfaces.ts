@@ -42,7 +42,7 @@ export interface GameObjectHiddenProperties {
 }
 
 export interface AnimationFrame {
-    [propName: string]: { start: number; end: number; duration: number };
+    [propName: string]: { duration: number, frames: number[] };
 }
 
 export interface DynamicGameObjectProperties {
