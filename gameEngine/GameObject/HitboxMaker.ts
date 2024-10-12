@@ -82,7 +82,7 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
             return;
         }
         await new Promise((resolve, reject) => {
-            img.src = `./gameEngine/GameImages/${this.imagePath}`;
+            img.src = `../MainGame/GameImages/${this.imagePath}`;
             img.onload = async () => {
                 this.imageElement = img;
                 if (!Object.keys(json.exports).includes(this.imagePath)) {

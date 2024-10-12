@@ -39,7 +39,7 @@ export class Button {
         this.func = func;
         const img = new Image();
         this.image = img;
-        img.src = `./gameEngine/GameImages/${this.imagePath}`;
+        img.src = `../MainGame/GameImages/${this.imagePath}`;
         img.onload = () => {
             this.image = img;
             this.loading = false;

@@ -18,9 +18,7 @@ const buildImage = async (obj: GameObject) => {
     await obj.loadImage();
 
     for (let otherObj of obj.otherObjects) {
-        if (!hitboxMaker.checkIfSaved(otherObj.imagePath)) {
-            await buildImage(otherObj);
-        }
+        await buildImage(otherObj);
     }
 };
 
@@ -62,8 +60,8 @@ function App() {
     const handleMouseMove = (event: MouseEvent) => {
         event.preventDefault();
         if (canvasRef.current) {
-            const offset = canvasRef.current.getBoundingClientRect();
-
+            const offset = gameState.canvas.getBoundingClientRect();
+            
             gameState.updateMousePos(
                 { width: offset.width, height: offset.height },
                 { x: event.clientX - offset.left, y: event.clientY - offset.top }
@@ -104,6 +102,16 @@ function App() {
     useEffect(() => {
         if (!canvasRef.current) return;
         canvasRef.current.replaceChildren(gameState.canvas);
+
+        gameState.canvas.addEventListener("mousemove", (e: any) => {
+            handleMouseMove(e);
+        });
+        gameState.canvas.addEventListener("mousedown", () => {
+            handleMouseDown();
+        });
+        gameState.canvas.addEventListener("mouseup", () => {
+            handleMouseUp();
+        });
         handleScreen();
 
         document.addEventListener("keydown", handleKeyDown);
@@ -140,13 +148,7 @@ function App() {
     return (
         <>
             <div className="outline" ref={divRef}>
-                <div
-                    className="canvas"
-                    ref={canvasRef}
-                    onMouseMove={handleMouseMove}
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}
-                ></div>
+                <div className="canvas" ref={canvasRef}></div>
             </div>
         </>
     );

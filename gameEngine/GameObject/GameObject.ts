@@ -63,7 +63,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     async loadImage() {
         await new Promise((resolve, reject) => {
             const img = new Image();
-            img.src = `./gameEngine/GameImages/${this.imagePath}`;
+            img.src = `../MainGame/GameImages/${this.imagePath}`;
             img.onload = () => {
                 this.imageElement = img;
                 this.game.extraCanvas.width = this.imageElement.naturalWidth;
@@ -108,13 +108,6 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     updateOutline() {
         // For each animation frame, get every outline and draw it
         this.outline = `M${this.x} ${this.y}`;
-        if (this.loading) {
-            this.loadFromExport();
-            if (this.highlighted) {
-                this.highlightObject();
-            }
-            return;
-        }
         for (let outline = 0; outline < this.hitboxes[this.activeFrame].length; outline++) {
             let currentOutline = this.hitboxes[this.activeFrame][outline];
             this.outline += currentOutline[0] + `M${this.x} ${this.y}`;
@@ -136,7 +129,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
     }
 
     getPositionFromBorder() {
-        return { x: -this.game.pos.x + this.x, y: this.game.pos.y + this.y }
+        return { x: -this.game.pos.x + this.x, y: this.game.pos.y + this.y };
     }
 
     detectClick() {
@@ -174,7 +167,7 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
             return false;
         }
         if (!this.checkLeftRight(otherObject) || !this.checkUpDown(otherObject)) return false;
-        
+
         otherObject.updateOutline();
         let otherObjectOutline = otherObject.outline;
 
@@ -190,8 +183,12 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.loading || otherObject.loading) {
             return false;
         }
-        if (!this.checkLeftRightAdjusted(otherObject, horizontalDistance) || !this.checkUpDownAdjusted(otherObject, verticalDistance)) return false;
-        
+        if (
+            !this.checkLeftRightAdjusted(otherObject, horizontalDistance) ||
+            !this.checkUpDownAdjusted(otherObject, verticalDistance)
+        )
+            return false;
+
         otherObject.updateOutline();
         let otherObjectOutline = otherObject.outline;
 
@@ -216,15 +213,15 @@ export class GameObject implements ObjectProps, GameObjectHiddenProperties {
         if (this.checkObjectIsToTheRight(otherObject)) {
             distance.x = otherObject.x - (this.x + this.width);
         } else {
-            let dist = (otherObject.x + otherObject.width) - this.x
-            distance.x = dist >= 0 ? 0 : dist
+            let dist = otherObject.x + otherObject.width - this.x;
+            distance.x = dist >= 0 ? 0 : dist;
         }
 
         if (this.checkObjectIsBelow(otherObject)) {
             distance.y = otherObject.y - (this.y + this.height);
         } else {
-            let dist = (otherObject.y + otherObject.height) - this.y
-            distance.y = dist >= 0 ? 0 : dist
+            let dist = otherObject.y + otherObject.height - this.y;
+            distance.y = dist >= 0 ? 0 : dist;
         }
 
         return distance;

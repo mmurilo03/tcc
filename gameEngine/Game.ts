@@ -154,7 +154,7 @@ export class Game {
         this.background = background;
         this.prevBackgroundImage = this.backgroundImage;
         const img = new Image();
-        img.src = `./gameEngine/GameImages/${imagePath}`;
+        img.src = `../MainGame/GameImages/${imagePath}`;
         img.onload = () => {
             this.backgroundImage = img;
         };
@@ -364,7 +364,7 @@ export class Game {
             return;
         }
         let audio: HTMLAudioElement;
-        audio = new Audio(`./gameEngine/GameSounds/${audioPath}`);
+        audio = new Audio(`../MainGame/GameSounds/${audioPath}`);
         if (speed && speed >= 0.1 && speed <= 16) {
             audio.playbackRate = speed;
         }
@@ -376,7 +376,7 @@ export class Game {
     }
 
     playAudio(audioPath: string, speed?: number) {
-        let audio = new Audio(`./gameEngine/GameSounds/${audioPath}`);
+        let audio = new Audio(`../MainGame/GameSounds/${audioPath}`);
         if (speed && speed >= 0.1 && speed <= 16) {
             audio.playbackRate = speed;
         }
