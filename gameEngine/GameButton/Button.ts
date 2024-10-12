@@ -8,7 +8,6 @@ interface Position {
 
 interface Text {
     fontSize: string;
-    fontStyle?: FontFace;
     text: string;
     textColor?: string;
     textPositionX: number;
