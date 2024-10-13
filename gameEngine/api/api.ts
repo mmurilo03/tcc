@@ -7,6 +7,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+app.post("/create", (req, res) => {
+    console.log("create");
+    
+    if (!fs.existsSync("./gameEngine/exports.json")) {
+        fs.writeFileSync("./gameEngine/exports.json", JSON.stringify({ exports: {} }, null, 4));
+    }
+    res.status(200).send("ok");
+    return;
+});
+
 app.post("/objects", (req, res) => {
     let jsonBefore = JSON.parse(fs.readFileSync("./gameEngine/exports.json", "utf-8")).exports;
     if (
