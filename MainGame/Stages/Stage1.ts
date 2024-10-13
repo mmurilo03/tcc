@@ -1,121 +1,126 @@
 import { Game } from "../../gameEngine/Game";
-import { Button } from "../../gameEngine/GameButton/Button";
 import { Floor } from "../GameClasses/Floor/Floor";
 import { Wolf } from "../GameClasses/Wolf";
-import { GameObject } from "../../gameEngine/GameObject/GameObject";
 import { Background } from "../../gameEngine/GameStages/Background";
 import { Stage } from "../../gameEngine/GameStages/Stage";
 import { FireBall } from "../GameClasses/FireBall";
+import { BlueSlime } from "../GameClasses/BlueSlime";
+import { GreenSlime } from "../GameClasses/GreenSlime";
+import { Knight } from "../GameClasses/Knight";
+import { GameObject } from "../../gameEngine/GameObject/GameObject";
+import { Slash } from "../GameClasses/Slash";
 
 export class Stage1 extends Stage {
-    wolf: Wolf;
+    knight: Knight;
+    slashes: Slash[] = [];
+    enemies: GameObject[] = [];
     floor: Floor[] = [];
+    score = 0;
+    playerHitTimer = 60;
     constructor(game: Game) {
         super(game, "Stage 1");
-        // for (let i = 0; i < 1; i++) {
-        //     this.wolf = new Wolf({ game: game, x: 3, y: 3 });
-        //     this.addObject(this.wolf);
-        // }
 
-        let fire = new FireBall({ game, x: 5, y: 5})
-        this.addObject(fire)
-        let button = new Button(
-            game,
-            { fontSize: "20px", textPositionX: 138, textPositionY: 130, text: "Click" },
-            "ButtonTest.png",
-            { x: 100, y: 100 },
-            () => {
-                console.log("AAAAAAAAAAAAAAA");
-            }
-        );
-        button.fixedPosition = true;
-        button.text.fontStyle = new FontFace(
-            "Grey Qo",
-            "url('https://fonts.gstatic.com/s/greyqo/v9/BXRrvF_Nmv_TyXxNPONa9Ff0.woff2')"
-        );
-        // button.text.textOutlineColor = "aqua"
-        // button.text.textOutlineWidth = 1
+        this.knight = new Knight({ game, x: 200, y: 5 });
+        this.addObject(this.knight);
 
-        // this.addButton(button)
+        const slash = new Slash({ game, x: 200, y: 5 });
+        this.addObject(slash);
+        this.slashes.push(slash);
 
-        // this.game.addText({
-        //     fontSize: "100px",
-        //     fontStyle: new FontFace(
-        //         "Grey Qo",
-        //         "url('https://fonts.gstatic.com/s/greyqo/v9/BXRrvF_Nmv_TyXxNPONa9Ff0.woff2')"
-        //     ),
-        //     textPositionX: 138,
-        //     textPositionY: 130,
-        //     text: "Wheares",
-        //     id: "efwe",
-        // });
+        const blue = new BlueSlime({ game, x: 200, y: 5 });
+        const green = new GreenSlime({ game, x: 200, y: 5 });
+        this.addObject(blue);
+        this.addObject(green);
+        this.enemies.push(blue);
+        this.enemies.push(green);
 
-        // for (let i = 0; i < 10; i++) {
-        //     let newFloor = new Floor({
-        //         game: game,
-        //         x: 400 + i * 30 + Math.random() * 400 - 200,
-        //         y: 200 + Math.random() * 2000,
-        //     });
-        //     this.floor.push(newFloor);
-        //     this.add(newFloor);
-        // }
-        for (let i = 0; i < 10; i++) {
-            let newFloor = new Floor({
-                game: game,
-                x: 400 + Math.round(Math.random() * 700),
-                y: Math.round(Math.random() * 300) + 200,
-            });
-            this.floor.push(newFloor);
-            this.addObject(newFloor);
-        }
-        const bg1 = new Background("Forest_background_3.png");
-        const bg2 = new Background("Forest_background_4.png");
+        const bg1 = new Background("forestBackground.png");
         this.addBackground(bg1);
-        this.addBackground(bg2);
-        this.setBackground("Forest_background_3.png");
+        this.setBackground("forestBackground.png");
+        this.game.addText({
+            fontSize: "80px",
+            id: "score",
+            text: `${this.score}`,
+            textPositionX: 50,
+            textPositionY: 80,
+        });
     }
 
     update(): void {
         super.update();
-        let removeThese: Floor[] = [];
-        // this.game.addText({
-        //     fontSize: "100px",
-        //     fontStyle: new FontFace(
-        //         "Sankofa Display",
-        //         "url('https://fonts.gstatic.com/s/sankofadisplay/v2/Ktk1ALSRd4LucUDghJ2rTqXOoh3HEKOY.woff2')"
-        //     ),
-        //     textPositionX: 138,
-        //     textPositionY: 130,
-        //     text: "ABCDEF",
-        //     id: "efwe",
-        // });
-        if (this.game.inputs.includes(" ")) {
-            let a = 400 + Math.round(Math.random() * 700);
-            let b = Math.round(Math.random() * 300) + 200;
-
-            let newFloor = new Floor({
-                game: this.game,
-                x: a,
-                y: b,
-            });
-            this.floor.push(newFloor);
-            this.addObject(newFloor);
+        this.game.clearText();
+        this.game.addText({
+            fontSize: "80px",
+            id: "score",
+            text: `${this.score}`,
+            textPositionX: 50,
+            textPositionY: 80,
+        });
+        this.playerHitTimer -= this.playerHitTimer > 0 ? 1: 0;
+        let removeSlashes: Slash[] = [];
+        if (this.game.inputs.includes(" ") && this.slashes.length < 1) {
+            const slash = new Slash({ game: this.game, x: this.knight.x, y: this.knight.y });
+            slash.flip = this.knight.flip;
+            slash.x += slash.flip ? -60 : 60;
+            slash.y -= 20;
+            slash.time = 0;
+            this.addObject(slash);
+            this.slashes.push(slash);
         }
 
-        this.floor.forEach((f) => {
-            if (this.wolf.checkCollision(f)) {
-                removeThese.push(f);
-                this.game.changeStage("Stage 2")
+        for (let slash of this.slashes) {
+            if (slash.time < 25) {
+                slash.time++;
             }
-        });
-        for (let floor of removeThese) {
-            this.floor.splice(this.floor.indexOf(floor), 1);
-            this.removeObject(floor);
+            if (slash.time >= 25) {
+                removeSlashes.push(slash);
+            }
+
+            for (let enemy of this.enemies) {
+                if (enemy.checkCollision(slash)) {
+                    this.enemies.splice(this.enemies.indexOf(enemy), 1);
+                    this.removeObject(enemy);
+                    this.score++;
+                }
+            }
+        }
+
+        for (let enemy of this.enemies) {
+            enemy.x += enemy.x < this.knight.x ? 1 : -1;
+            enemy.y += enemy.y < this.knight.y ? 1 : -1;
+
+            if (enemy.checkCollision(this.knight) && this.playerHitTimer == 0) {
+                this.playerHitTimer = 60;
+                this.score -= 1;
+                break;
+            }
+        }
+
+        for (let obj of removeSlashes) {
+            this.removeObject(obj);
+            this.slashes.splice(this.slashes.indexOf(obj), 1);
+        }
+
+        if (this.enemies.length < 5) {
+            const enemy: GameObject =
+                Math.floor(Math.random() * 2) == 0
+                    ? new GreenSlime({
+                          game: this.game,
+                          x: Math.floor(Math.random() * 1000),
+                          y: Math.floor(Math.random() * 500),
+                      })
+                    : new BlueSlime({
+                          game: this.game,
+                          x: Math.floor(Math.random() * 1000),
+                          y: Math.floor(Math.random() * 500),
+                      });
+            this.addObject(enemy);
+            this.enemies.push(enemy);
         }
     }
 
     init() {
-        let wolf = this.getGlobalObject("wolf")
-        if (wolf) this.wolf = wolf as Wolf
+        // let wolf = this.getGlobalObject("wolf")
+        // if (wolf) this.wolf = wolf as Wolf
     }
 }
