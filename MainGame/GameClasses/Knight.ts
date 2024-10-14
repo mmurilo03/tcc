@@ -2,7 +2,7 @@ import { GameObjectDynamic } from "../../gameEngine/GameObject/GameObjectDynamic
 import { ObjectPropsSimple } from "../../gameEngine/Interfaces/GameObjectInterfaces";
 
 export class Knight extends GameObjectDynamic {
-    static imagePath: string = "knight.png";
+    static imagePath: string = "knightNoArm.png";
     speed = 5;
     constructor({ game, x, y }: ObjectPropsSimple) {
         super(

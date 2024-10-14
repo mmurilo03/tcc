@@ -12,7 +12,7 @@ import { Slash } from "../GameClasses/Slash";
 
 export class Stage1 extends Stage {
     knight: Knight;
-    slashes: Slash[] = [];
+    slash: Slash;
     enemies: GameObject[] = [];
     floor: Floor[] = [];
     score = 0;
@@ -23,9 +23,8 @@ export class Stage1 extends Stage {
         this.knight = new Knight({ game, x: 200, y: 5 });
         this.addObject(this.knight);
 
-        const slash = new Slash({ game, x: 200, y: 5 });
-        this.addObject(slash);
-        this.slashes.push(slash);
+        this.slash = new Slash({ game, x: 200, y: 5 });
+        this.addObject(this.slash);
 
         const blue = new BlueSlime({ game, x: 200, y: 5 });
         const green = new GreenSlime({ game, x: 200, y: 5 });
@@ -56,35 +55,26 @@ export class Stage1 extends Stage {
             textPositionX: 50,
             textPositionY: 80,
         });
+        this.slash.x = this.knight.x;
+        this.slash.y = this.knight.y;
+        this.slash.flip = this.knight.flip;
         this.playerHitTimer -= this.playerHitTimer > 0 ? 1: 0;
-        let removeSlashes: Slash[] = [];
-        if (this.game.inputs.includes(" ") && this.slashes.length < 1) {
-            const slash = new Slash({ game: this.game, x: this.knight.x, y: this.knight.y });
-            slash.flip = this.knight.flip;
-            slash.x += slash.flip ? -60 : 60;
-            slash.y -= 20;
-            slash.time = 0;
-            this.addObject(slash);
-            this.slashes.push(slash);
+        if (this.game.inputs.includes(" ") && this.slash.time == 0) {
+            this.slash.state = "slash";
+            this.slash.time = 35;
         }
 
-        for (let slash of this.slashes) {
-            if (slash.time < 25) {
-                slash.time++;
-            }
-            if (slash.time >= 25) {
-                removeSlashes.push(slash);
-            }
-
+        if (this.slash.time > 0) {
             for (let enemy of this.enemies) {
-                if (enemy.checkCollision(slash)) {
+                if (enemy.checkCollision(this.slash)) {
                     this.enemies.splice(this.enemies.indexOf(enemy), 1);
                     this.removeObject(enemy);
                     this.score++;
                 }
             }
         }
-
+        this.slash.time -= this.slash.time > 0 ? 1 : 0
+        this.slash.state = this.slash.time == 0 ? "idle" : "slash"
         for (let enemy of this.enemies) {
             enemy.x += enemy.x < this.knight.x ? 1 : -1;
             enemy.y += enemy.y < this.knight.y ? 1 : -1;
@@ -94,11 +84,6 @@ export class Stage1 extends Stage {
                 this.score -= 1;
                 break;
             }
-        }
-
-        for (let obj of removeSlashes) {
-            this.removeObject(obj);
-            this.slashes.splice(this.slashes.indexOf(obj), 1);
         }
 
         if (this.enemies.length < 5) {
