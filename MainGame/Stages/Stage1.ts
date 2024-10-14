@@ -86,18 +86,18 @@ export class Stage1 extends Stage {
             }
         }
 
-        if (this.enemies.length < 5) {
+        if (this.enemies.length < 20) {
             const enemy: GameObject =
                 Math.floor(Math.random() * 2) == 0
                     ? new GreenSlime({
                           game: this.game,
-                          x: Math.floor(Math.random() * 1000),
-                          y: Math.floor(Math.random() * 500),
+                          x: Math.floor(Math.random() * 2000) - 500,
+                          y: Math.floor(Math.random() * 1000) - 250,
                       })
                     : new BlueSlime({
                           game: this.game,
-                          x: Math.floor(Math.random() * 1000),
-                          y: Math.floor(Math.random() * 500),
+                          x: Math.floor(Math.random() * 2000) - 500,
+                          y: Math.floor(Math.random() * 1000) - 250,
                       });
             this.addObject(enemy);
             this.enemies.push(enemy);
