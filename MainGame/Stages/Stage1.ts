@@ -136,7 +136,9 @@ export class Stage1 extends Stage {
             }
         }
 
-        if (this.enemies.length < 20) {
+        const aditionalEnemies = Math.floor(this.score/20);
+        const enemyAmount = 5 + aditionalEnemies > 20 ? 20 : 5 + aditionalEnemies; 
+        if (this.enemies.length < enemyAmount) {
             const enemy: GameObject =
                 Math.floor(Math.random() * 2) == 0
                     ? new GreenSlime({
