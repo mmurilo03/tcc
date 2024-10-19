@@ -18,13 +18,20 @@ export class GameObjectDynamic extends GameObject implements DynamicGameObjectPr
 
         if (this.state != this.previousState) {
             this.previousState = this.state;
-            this.activeFrame = this.animationFrames[this.state].start;
+            this.activeFrame = this.animationFrames[this.state].frames[0];
+        }
+        
+        if (isNaN(this.activeFrame)) {
+            return;
         }
         if (this.frameCounter > this.animationFrames[this.state].duration) {
             this.frameCounter = 0;
             this.activeFrame++;
-            if (this.activeFrame > this.animationFrames[this.state].end) {
-                this.activeFrame = this.animationFrames[this.state].start;
+            if (
+                this.activeFrame >
+                this.animationFrames[this.state].frames[this.animationFrames[this.state].frames.length - 1]
+            ) {
+                this.activeFrame = this.animationFrames[this.state].frames[0];
             }
         }
     }

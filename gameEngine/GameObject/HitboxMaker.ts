@@ -76,13 +76,20 @@ export class HitboxMaker implements HitboxMakerInterface, HitboxMakerProperties 
         this.savedHitboxes[this.imagePath] = this.imagePath;
 
         let ex = await fetch(new URL("../exports.json", import.meta.url));
-        let json = await ex.json();
+        let json;
+        try {
+            json = await ex.json();
+        } catch (e) {
+            await api.post("/create");
+            ex = await fetch(new URL("../exports.json", import.meta.url));
+            json = await ex.json();
+        }
 
         if (Object.keys(json.exports).includes(this.imagePath)) {
             return;
         }
         await new Promise((resolve, reject) => {
-            img.src = `./gameEngine/GameImages/${this.imagePath}`;
+            img.src = `../MainGame/GameImages/${this.imagePath}`;
             img.onload = async () => {
                 this.imageElement = img;
                 if (!Object.keys(json.exports).includes(this.imagePath)) {

@@ -10,7 +10,7 @@ interface StagePaths {
     [pathToStage: string]: StageInterface;
 }
 
-const stages: StagePaths = import.meta.glob("./Stages/*.ts", { eager: true });
+const stages: StagePaths = import.meta.glob("../../MainGame/Stages/*.ts", { eager: true });
 let temp = [];
 
 for (const path in stages) {

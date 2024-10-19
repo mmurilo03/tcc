@@ -18,15 +18,15 @@ const buildImage = async (obj: GameObject) => {
     await obj.loadImage();
 
     for (let otherObj of obj.otherObjects) {
-        if (!hitboxMaker.checkIfSaved(otherObj.imagePath)) {
-            await buildImage(otherObj);
-        }
+        await buildImage(otherObj);
     }
 };
 
 const loadGame = async () => {
-    for (let obj of game.globalObjects.stageObjects) {
-        await buildImage(obj);
+    if (game.globalStage) {
+        for (let obj of game.globalStage.stageObjects) {
+            await buildImage(obj);
+        }
     }
 
     for (let stage in game.stages) {
@@ -41,6 +41,7 @@ const loadGame = async () => {
 
 function App() {
     const canvasRef = useRef<HTMLDivElement>(null);
+    const divRef = useRef<HTMLDivElement>(null);
     const { current: gameState } = useRef(game);
 
     const [loading, setLoading] = useState(true);
@@ -59,8 +60,8 @@ function App() {
     const handleMouseMove = (event: MouseEvent) => {
         event.preventDefault();
         if (canvasRef.current) {
-            const offset = canvasRef.current.getBoundingClientRect();
-
+            const offset = gameState.canvas.getBoundingClientRect();
+            
             gameState.updateMousePos(
                 { width: offset.width, height: offset.height },
                 { x: event.clientX - offset.left, y: event.clientY - offset.top }
@@ -76,16 +77,51 @@ function App() {
         gameState.mouseUp();
     };
 
+    const handleScreen = () => {
+        if (divRef.current && canvasRef.current) {
+            const windowWidth = Math.ceil(window.innerWidth * 0.95);
+            const windowHeight = Math.ceil(window.innerHeight * 0.95);
+            divRef.current.style.width = `${windowWidth}px`;
+            divRef.current.style.height = `${windowHeight}px`;
+
+            const canvasWidth = Number(gameState.canvas.width);
+            const canvasHeight = Number(gameState.canvas.height);
+
+            const widthProportion = windowWidth / canvasWidth;
+            const heightProportion = windowHeight / canvasHeight;
+
+            const finalProportion = widthProportion < heightProportion ? widthProportion : heightProportion;
+
+            const finalWidth = Math.ceil(canvasWidth * finalProportion);
+            const finalHeight = Math.ceil(canvasHeight * finalProportion);
+            gameState.canvas.style.width = `${finalWidth}px`;
+            gameState.canvas.style.height = `${finalHeight}px`;
+        }
+    };
+
     useEffect(() => {
         if (!canvasRef.current) return;
         canvasRef.current.replaceChildren(gameState.canvas);
 
+        gameState.canvas.addEventListener("mousemove", (e: any) => {
+            handleMouseMove(e);
+        });
+        gameState.canvas.addEventListener("mousedown", () => {
+            handleMouseDown();
+        });
+        gameState.canvas.addEventListener("mouseup", () => {
+            handleMouseUp();
+        });
+        handleScreen();
+
         document.addEventListener("keydown", handleKeyDown);
         document.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("resize", handleScreen);
 
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
-            document.addEventListener("keyup", handleKeyUp);
+            document.removeEventListener("keyup", handleKeyUp);
+            window.removeEventListener("resize", handleScreen);
         };
     });
 
@@ -111,14 +147,8 @@ function App() {
 
     return (
         <>
-            <div className="outline">
-                <div
-                    className="canvas"
-                    ref={canvasRef}
-                    onMouseMove={handleMouseMove}
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}
-                ></div>
+            <div className="outline" ref={divRef}>
+                <div className="canvas" ref={canvasRef}></div>
             </div>
         </>
     );
